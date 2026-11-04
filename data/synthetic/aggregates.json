@@ -1,0 +1,92 @@
+{
+  "attack_days": 14,
+  "attack_entries": 16,
+  "duration": {
+    "max_minutes": 720,
+    "median_minutes": 240.0,
+    "min_minutes": 90,
+    "n": 11
+  },
+  "medications": [
+    {
+      "attack_entries": 1,
+      "display_name": "acetaminophen",
+      "distinct_days": 1,
+      "outcomes": {
+        "relief": 1
+      }
+    },
+    {
+      "attack_entries": 1,
+      "display_name": "Advil",
+      "distinct_days": 1,
+      "outcomes": {
+        "relief": 1
+      }
+    },
+    {
+      "attack_entries": 4,
+      "display_name": "Excedrin",
+      "distinct_days": 4,
+      "outcomes": {
+        "none": 2,
+        "relief": 2
+      }
+    },
+    {
+      "attack_entries": 4,
+      "display_name": "ibuprofen",
+      "distinct_days": 4,
+      "outcomes": {
+        "partial": 2,
+        "relief": 2
+      }
+    },
+    {
+      "attack_entries": 2,
+      "display_name": "naproxen",
+      "distinct_days": 2,
+      "outcomes": {
+        "relief": 2
+      }
+    },
+    {
+      "attack_entries": 1,
+      "display_name": "sumatriptan",
+      "distinct_days": 1,
+      "outcomes": {
+        "partial": 1
+      }
+    }
+  ],
+  "no_attack_days": 62,
+  "not_logged_days": 14,
+  "severity_counts": {
+    "1": 7,
+    "2": 2,
+    "3": 5
+  },
+  "severity_n": 14,
+  "symptoms": {
+    "aura": 2,
+    "dizziness": 4,
+    "light_sensitivity": 9,
+    "nausea": 8,
+    "smell_sensitivity": 2,
+    "sound_sensitivity": 2,
+    "vomiting": 2
+  },
+  "symptoms_n": 16,
+  "triggers": {
+    "bad sleep": 2,
+    "dehydration": 4,
+    "missed coffee": 3,
+    "skipped breakfast": 1,
+    "stress": 2,
+    "strong perfume": 1
+  },
+  "triggers_n": 16,
+  "unconfirmed_entries": 3,
+  "window_end": "2026-10-31",
+  "window_start": "2026-08-03"
+}

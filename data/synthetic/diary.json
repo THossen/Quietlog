@@ -1,0 +1,1382 @@
+{
+  "entries": [
+    {
+      "attack": {
+        "acute_medications": [
+          {
+            "dose": "2 tablets",
+            "name": "Excedrin",
+            "outcome": "relief",
+            "second_dose": null,
+            "time_taken": null
+          }
+        ],
+        "attack_start": "2026-08-06T12:00:00-04:00",
+        "attack_start_precision": "approximate",
+        "duration_minutes": 120,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": false,
+        "pain_0_10": null,
+        "reported_triggers": [
+          "dehydration"
+        ],
+        "severity_function": 2,
+        "symptoms": {
+          "aura": null,
+          "dizziness": null,
+          "light_sensitivity": true,
+          "nausea": true,
+          "other": [
+            "yawning a lot"
+          ],
+          "smell_sensitivity": null,
+          "sound_sensitivity": null,
+          "vomiting": false
+        },
+        "time_expression": "around noon",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-08-07T08:15:00-04:00",
+      "entry_date": "2026-08-07",
+      "entry_type": "attack",
+      "id": "syn-attack-000",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": "Migraine around noon. Moderate, it's slowing me down. I have nausea, light sensitivity. No vomiting. Took Excedrin 2 tablets, it helped. Probably dehydration. It's over now."
+    },
+    {
+      "attack": {
+        "acute_medications": [
+          {
+            "dose": "200mg",
+            "name": "ibuprofen",
+            "outcome": "partial",
+            "second_dose": null,
+            "time_taken": null
+          }
+        ],
+        "attack_start": "2026-08-14T12:00:00-04:00",
+        "attack_start_precision": "date_only",
+        "duration_minutes": null,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": false,
+        "pain_0_10": null,
+        "reported_triggers": [],
+        "severity_function": 1,
+        "symptoms": {
+          "aura": null,
+          "dizziness": null,
+          "light_sensitivity": true,
+          "nausea": true,
+          "other": [],
+          "smell_sensitivity": null,
+          "sound_sensitivity": null,
+          "vomiting": null
+        },
+        "time_expression": "today",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-08-14T13:05:00-04:00",
+      "entry_date": "2026-08-14",
+      "entry_type": "attack",
+      "id": "syn-attack-001",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": "Migraine today. Mild, I can still function. I have nausea, light sensitivity. Took ibuprofen 200mg, helped a bit. It's over now."
+    },
+    {
+      "attack": {
+        "acute_medications": [],
+        "attack_start": "2026-08-14T12:00:00-04:00",
+        "attack_start_precision": "date_only",
+        "duration_minutes": null,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": false,
+        "pain_0_10": null,
+        "reported_triggers": [
+          "stress"
+        ],
+        "severity_function": 1,
+        "symptoms": {
+          "aura": null,
+          "dizziness": null,
+          "light_sensitivity": true,
+          "nausea": null,
+          "other": [],
+          "smell_sensitivity": null,
+          "sound_sensitivity": true,
+          "vomiting": null
+        },
+        "time_expression": "today",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-08-14T19:30:00-04:00",
+      "entry_date": "2026-08-14",
+      "entry_type": "attack",
+      "id": "syn-attack-002",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": "Migraine today. Mild, I can still function. I have light sensitivity, sound sensitivity. Probably stress. It's over now."
+    },
+    {
+      "attack": {
+        "acute_medications": [
+          {
+            "dose": "2 tablets",
+            "name": "Excedrin",
+            "outcome": "relief",
+            "second_dose": null,
+            "time_taken": null
+          }
+        ],
+        "attack_start": "2026-08-19T17:00:00-04:00",
+        "attack_start_precision": "approximate",
+        "duration_minutes": null,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": false,
+        "pain_0_10": 3,
+        "reported_triggers": [
+          "dehydration",
+          "bad sleep"
+        ],
+        "severity_function": 3,
+        "symptoms": {
+          "aura": null,
+          "dizziness": true,
+          "light_sensitivity": null,
+          "nausea": null,
+          "other": [
+            "neck stiffness"
+          ],
+          "smell_sensitivity": null,
+          "sound_sensitivity": null,
+          "vomiting": false
+        },
+        "time_expression": "an hour ago",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-08-19T18:00:00-04:00",
+      "entry_date": "2026-08-19",
+      "entry_type": "attack",
+      "id": "syn-attack-003",
+      "processing_error": null,
+      "status": "unconfirmed",
+      "transcript": "Migraine an hour ago. Severe, I can't do anything. I have dizziness. No vomiting. Took Excedrin 2 tablets, it helped. Probably dehydration and bad sleep. It's over now."
+    },
+    {
+      "attack": {
+        "acute_medications": [
+          {
+            "dose": "200mg",
+            "name": "Ibuprofen",
+            "outcome": "relief",
+            "second_dose": null,
+            "time_taken": null
+          }
+        ],
+        "attack_start": "2026-08-22T07:25:00-04:00",
+        "attack_start_precision": "approximate",
+        "duration_minutes": 720,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": false,
+        "pain_0_10": null,
+        "reported_triggers": [],
+        "severity_function": null,
+        "symptoms": {
+          "aura": null,
+          "dizziness": null,
+          "light_sensitivity": true,
+          "nausea": null,
+          "other": [],
+          "smell_sensitivity": null,
+          "sound_sensitivity": null,
+          "vomiting": null
+        },
+        "time_expression": "20 minutes ago",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-08-22T07:45:00-04:00",
+      "entry_date": "2026-08-22",
+      "entry_type": "attack",
+      "id": "syn-attack-004",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": "Migraine 20 minutes ago. I have light sensitivity. Took Ibuprofen 200mg, it helped. It's over now."
+    },
+    {
+      "attack": {
+        "acute_medications": [
+          {
+            "dose": "500mg",
+            "name": "naproxen",
+            "outcome": "relief",
+            "second_dose": null,
+            "time_taken": null
+          }
+        ],
+        "attack_start": "2026-08-23T11:10:00-04:00",
+        "attack_start_precision": "approximate",
+        "duration_minutes": null,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": false,
+        "pain_0_10": null,
+        "reported_triggers": [],
+        "severity_function": 3,
+        "symptoms": {
+          "aura": null,
+          "dizziness": null,
+          "light_sensitivity": true,
+          "nausea": true,
+          "other": [],
+          "smell_sensitivity": null,
+          "sound_sensitivity": null,
+          "vomiting": null
+        },
+        "time_expression": "since lunch",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-08-23T11:10:00-04:00",
+      "entry_date": "2026-08-23",
+      "entry_type": "attack",
+      "id": "syn-attack-005",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": "Migraine since lunch. Severe, I can't do anything. I have nausea, light sensitivity. Took naproxen 500mg, it helped. It's over now."
+    },
+    {
+      "attack": {
+        "acute_medications": [
+          {
+            "dose": "500mg",
+            "name": "acetaminophen",
+            "outcome": "relief",
+            "second_dose": null,
+            "time_taken": null
+          }
+        ],
+        "attack_start": "2026-09-05T12:00:00-04:00",
+        "attack_start_precision": "approximate",
+        "duration_minutes": 300,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": false,
+        "pain_0_10": null,
+        "reported_triggers": [
+          "missed coffee",
+          "bad sleep"
+        ],
+        "severity_function": 1,
+        "symptoms": {
+          "aura": null,
+          "dizziness": null,
+          "light_sensitivity": true,
+          "nausea": true,
+          "other": [],
+          "smell_sensitivity": null,
+          "sound_sensitivity": false,
+          "vomiting": null
+        },
+        "time_expression": "around noon",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-09-05T20:45:00-04:00",
+      "entry_date": "2026-09-05",
+      "entry_type": "attack",
+      "id": "syn-attack-006",
+      "processing_error": null,
+      "status": "unconfirmed",
+      "transcript": "Migraine around noon. Mild, I can still function. I have nausea, light sensitivity. No sound sensitivity. Took acetaminophen 500mg, it helped. Probably missed coffee and bad sleep. It's over now."
+    },
+    {
+      "attack": {
+        "acute_medications": [
+          {
+            "dose": "400mg",
+            "name": "ibuprofen",
+            "outcome": "relief",
+            "second_dose": null,
+            "time_taken": null
+          }
+        ],
+        "attack_start": "2026-09-15T20:10:00-04:00",
+        "attack_start_precision": "approximate",
+        "duration_minutes": 180,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": false,
+        "pain_0_10": null,
+        "reported_triggers": [
+          "skipped breakfast"
+        ],
+        "severity_function": 3,
+        "symptoms": {
+          "aura": null,
+          "dizziness": null,
+          "light_sensitivity": null,
+          "nausea": null,
+          "other": [],
+          "smell_sensitivity": null,
+          "sound_sensitivity": null,
+          "vomiting": null
+        },
+        "time_expression": "an hour ago",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-09-15T21:10:00-04:00",
+      "entry_date": "2026-09-15",
+      "entry_type": "attack",
+      "id": "syn-attack-007",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": "Migraine an hour ago. Severe, I can't do anything. Took ibuprofen 400mg, it helped. Probably skipped breakfast. It's over now."
+    },
+    {
+      "attack": {
+        "acute_medications": [
+          {
+            "dose": "200mg",
+            "name": "Advil",
+            "outcome": "relief",
+            "second_dose": true,
+            "time_taken": null
+          }
+        ],
+        "attack_start": "2026-09-18T12:00:00-04:00",
+        "attack_start_precision": "approximate",
+        "duration_minutes": null,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": false,
+        "pain_0_10": null,
+        "reported_triggers": [
+          "missed coffee"
+        ],
+        "severity_function": 2,
+        "symptoms": {
+          "aura": null,
+          "dizziness": true,
+          "light_sensitivity": true,
+          "nausea": null,
+          "other": [],
+          "smell_sensitivity": null,
+          "sound_sensitivity": null,
+          "vomiting": true
+        },
+        "time_expression": "around noon",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-09-18T15:30:00-04:00",
+      "entry_date": "2026-09-18",
+      "entry_type": "attack",
+      "id": "syn-attack-008",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": "Migraine around noon. Moderate, it's slowing me down. I have vomiting, light sensitivity, dizziness. Took Advil 200mg, it helped. Probably missed coffee. It's over now."
+    },
+    {
+      "attack": {
+        "acute_medications": [
+          {
+            "dose": "2 tablets",
+            "name": "Excedrin",
+            "outcome": "none",
+            "second_dose": null,
+            "time_taken": null
+          }
+        ],
+        "attack_start": "2026-09-20T15:45:00-04:00",
+        "attack_start_precision": "approximate",
+        "duration_minutes": 480,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": true,
+        "pain_0_10": 3,
+        "reported_triggers": [
+          "dehydration"
+        ],
+        "severity_function": 1,
+        "symptoms": {
+          "aura": null,
+          "dizziness": null,
+          "light_sensitivity": null,
+          "nausea": null,
+          "other": [],
+          "smell_sensitivity": null,
+          "sound_sensitivity": null,
+          "vomiting": null
+        },
+        "time_expression": "an hour ago",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-09-20T16:45:00-04:00",
+      "entry_date": "2026-09-20",
+      "entry_type": "attack",
+      "id": "syn-attack-009",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": "Migraine an hour ago. Mild, I can still function. Took Excedrin 2 tablets, didn't help. Probably dehydration. Still going."
+    },
+    {
+      "attack": {
+        "acute_medications": [],
+        "attack_start": "2026-09-26T11:05:00-04:00",
+        "attack_start_precision": "approximate",
+        "duration_minutes": 240,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": true,
+        "pain_0_10": null,
+        "reported_triggers": [],
+        "severity_function": 3,
+        "symptoms": {
+          "aura": null,
+          "dizziness": null,
+          "light_sensitivity": null,
+          "nausea": true,
+          "other": [],
+          "smell_sensitivity": null,
+          "sound_sensitivity": null,
+          "vomiting": null
+        },
+        "time_expression": "since lunch",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-09-26T11:05:00-04:00",
+      "entry_date": "2026-09-26",
+      "entry_type": "attack",
+      "id": "syn-attack-010",
+      "processing_error": null,
+      "status": "unconfirmed",
+      "transcript": "Migraine since lunch. Severe, I can't do anything. I have nausea. Still going."
+    },
+    {
+      "attack": {
+        "acute_medications": [
+          {
+            "dose": "400mg",
+            "name": "Ibuprofen",
+            "outcome": "partial",
+            "second_dose": null,
+            "time_taken": null
+          }
+        ],
+        "attack_start": "2026-09-30T07:00:00-04:00",
+        "attack_start_precision": "exact",
+        "duration_minutes": 720,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": false,
+        "pain_0_10": 9,
+        "reported_triggers": [
+          "stress"
+        ],
+        "severity_function": 1,
+        "symptoms": {
+          "aura": null,
+          "dizziness": null,
+          "light_sensitivity": null,
+          "nausea": true,
+          "other": [],
+          "smell_sensitivity": true,
+          "sound_sensitivity": null,
+          "vomiting": null
+        },
+        "time_expression": "at 7am",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-09-30T10:00:00-04:00",
+      "entry_date": "2026-09-30",
+      "entry_type": "attack",
+      "id": "syn-attack-011",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": "Migraine at 7am. Mild, I can still function. I have nausea, smell sensitivity. Took Ibuprofen 400mg, helped a bit. Probably stress. It's over now."
+    },
+    {
+      "attack": {
+        "acute_medications": [
+          {
+            "dose": "500mg",
+            "name": "naproxen",
+            "outcome": "relief",
+            "second_dose": null,
+            "time_taken": null
+          }
+        ],
+        "attack_start": "2026-10-13T20:45:00-04:00",
+        "attack_start_precision": "approximate",
+        "duration_minutes": 120,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": false,
+        "pain_0_10": 8,
+        "reported_triggers": [],
+        "severity_function": 3,
+        "symptoms": {
+          "aura": null,
+          "dizziness": null,
+          "light_sensitivity": true,
+          "nausea": null,
+          "other": [],
+          "smell_sensitivity": null,
+          "sound_sensitivity": null,
+          "vomiting": null
+        },
+        "time_expression": "20 minutes ago",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-10-13T21:05:00-04:00",
+      "entry_date": "2026-10-13",
+      "entry_type": "attack",
+      "id": "syn-attack-012",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": "Migraine 20 minutes ago. Severe, I can't do anything. I have light sensitivity. Took naproxen 500mg, it helped. It's over now."
+    },
+    {
+      "attack": {
+        "acute_medications": [
+          {
+            "dose": "100mg",
+            "name": "sumatriptan",
+            "outcome": "partial",
+            "second_dose": null,
+            "time_taken": null
+          }
+        ],
+        "attack_start": "2026-10-14T17:05:00-04:00",
+        "attack_start_precision": "approximate",
+        "duration_minutes": 600,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": false,
+        "pain_0_10": 4,
+        "reported_triggers": [
+          "strong perfume",
+          "dehydration"
+        ],
+        "severity_function": 1,
+        "symptoms": {
+          "aura": true,
+          "dizziness": null,
+          "light_sensitivity": null,
+          "nausea": null,
+          "other": [
+            "yawning a lot"
+          ],
+          "smell_sensitivity": true,
+          "sound_sensitivity": null,
+          "vomiting": true
+        },
+        "time_expression": "this evening",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-10-14T17:05:00-04:00",
+      "entry_date": "2026-10-14",
+      "entry_type": "attack",
+      "id": "syn-attack-013",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": "Migraine this evening. Mild, I can still function. I have aura with zigzag lines, vomiting, smell sensitivity. Took sumatriptan 100mg, helped a bit. Probably strong perfume and dehydration. It's over now."
+    },
+    {
+      "attack": {
+        "acute_medications": [],
+        "attack_start": "2026-10-16T10:00:00-04:00",
+        "attack_start_precision": "approximate",
+        "duration_minutes": 240,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": false,
+        "pain_0_10": 1,
+        "reported_triggers": [
+          "missed coffee"
+        ],
+        "severity_function": 1,
+        "symptoms": {
+          "aura": true,
+          "dizziness": true,
+          "light_sensitivity": null,
+          "nausea": true,
+          "other": [],
+          "smell_sensitivity": null,
+          "sound_sensitivity": true,
+          "vomiting": null
+        },
+        "time_expression": "an hour ago",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-10-16T11:00:00-04:00",
+      "entry_date": "2026-10-16",
+      "entry_type": "attack",
+      "id": "syn-attack-014",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": "Migraine an hour ago. Mild, I can still function. I have aura with zigzag lines, nausea, sound sensitivity, dizziness. Probably missed coffee. It's over now."
+    },
+    {
+      "attack": {
+        "acute_medications": [
+          {
+            "dose": "2 tablets",
+            "name": "Excedrin",
+            "outcome": "none",
+            "second_dose": null,
+            "time_taken": null
+          }
+        ],
+        "attack_start": "2026-10-16T00:00:00-04:00",
+        "attack_start_precision": "exact",
+        "duration_minutes": 90,
+        "evidence": {},
+        "menstrual_context": null,
+        "notes": null,
+        "ongoing": false,
+        "pain_0_10": null,
+        "reported_triggers": [],
+        "severity_function": null,
+        "symptoms": {
+          "aura": null,
+          "dizziness": true,
+          "light_sensitivity": true,
+          "nausea": true,
+          "other": [],
+          "smell_sensitivity": false,
+          "sound_sensitivity": null,
+          "vomiting": null
+        },
+        "time_expression": "at midnight",
+        "unsupported_fields": []
+      },
+      "audio_path": null,
+      "created_at": "2026-10-16T18:10:00-04:00",
+      "entry_date": "2026-10-16",
+      "entry_type": "attack",
+      "id": "syn-attack-015",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": "Migraine at midnight. I have nausea, light sensitivity, dizziness. No smell sensitivity. Took Excedrin 2 tablets, didn't help. It's over now."
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-03T21:00:00-04:00",
+      "entry_date": "2026-08-03",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-000",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-04T21:00:00-04:00",
+      "entry_date": "2026-08-04",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-001",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-05T21:00:00-04:00",
+      "entry_date": "2026-08-05",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-002",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-06T21:00:00-04:00",
+      "entry_date": "2026-08-06",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-003",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-08T21:00:00-04:00",
+      "entry_date": "2026-08-08",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-004",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-10T21:00:00-04:00",
+      "entry_date": "2026-08-10",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-005",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-11T21:00:00-04:00",
+      "entry_date": "2026-08-11",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-006",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-12T21:00:00-04:00",
+      "entry_date": "2026-08-12",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-007",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-13T21:00:00-04:00",
+      "entry_date": "2026-08-13",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-008",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-17T21:00:00-04:00",
+      "entry_date": "2026-08-17",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-009",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-18T21:00:00-04:00",
+      "entry_date": "2026-08-18",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-010",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-20T21:00:00-04:00",
+      "entry_date": "2026-08-20",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-011",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-21T21:00:00-04:00",
+      "entry_date": "2026-08-21",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-012",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-26T21:00:00-04:00",
+      "entry_date": "2026-08-26",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-013",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-27T21:00:00-04:00",
+      "entry_date": "2026-08-27",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-014",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-28T21:00:00-04:00",
+      "entry_date": "2026-08-28",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-015",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-29T21:00:00-04:00",
+      "entry_date": "2026-08-29",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-016",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-30T21:00:00-04:00",
+      "entry_date": "2026-08-30",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-017",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-08-31T21:00:00-04:00",
+      "entry_date": "2026-08-31",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-018",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-01T21:00:00-04:00",
+      "entry_date": "2026-09-01",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-019",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-02T21:00:00-04:00",
+      "entry_date": "2026-09-02",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-020",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-03T21:00:00-04:00",
+      "entry_date": "2026-09-03",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-021",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-04T21:00:00-04:00",
+      "entry_date": "2026-09-04",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-022",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-06T21:00:00-04:00",
+      "entry_date": "2026-09-06",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-023",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-07T21:00:00-04:00",
+      "entry_date": "2026-09-07",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-024",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-08T21:00:00-04:00",
+      "entry_date": "2026-09-08",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-025",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-09T21:00:00-04:00",
+      "entry_date": "2026-09-09",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-026",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-10T21:00:00-04:00",
+      "entry_date": "2026-09-10",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-027",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-12T21:00:00-04:00",
+      "entry_date": "2026-09-12",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-028",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-13T21:00:00-04:00",
+      "entry_date": "2026-09-13",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-029",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-14T21:00:00-04:00",
+      "entry_date": "2026-09-14",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-030",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-16T21:00:00-04:00",
+      "entry_date": "2026-09-16",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-031",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-17T21:00:00-04:00",
+      "entry_date": "2026-09-17",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-032",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-19T21:00:00-04:00",
+      "entry_date": "2026-09-19",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-033",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-21T21:00:00-04:00",
+      "entry_date": "2026-09-21",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-034",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-22T21:00:00-04:00",
+      "entry_date": "2026-09-22",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-035",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-23T21:00:00-04:00",
+      "entry_date": "2026-09-23",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-036",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-25T21:00:00-04:00",
+      "entry_date": "2026-09-25",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-037",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-27T21:00:00-04:00",
+      "entry_date": "2026-09-27",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-038",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-28T21:00:00-04:00",
+      "entry_date": "2026-09-28",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-039",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-09-29T21:00:00-04:00",
+      "entry_date": "2026-09-29",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-040",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-02T21:00:00-04:00",
+      "entry_date": "2026-10-02",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-041",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-04T21:00:00-04:00",
+      "entry_date": "2026-10-04",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-042",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-06T21:00:00-04:00",
+      "entry_date": "2026-10-06",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-043",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-08T21:00:00-04:00",
+      "entry_date": "2026-10-08",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-044",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-09T21:00:00-04:00",
+      "entry_date": "2026-10-09",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-045",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-10T21:00:00-04:00",
+      "entry_date": "2026-10-10",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-046",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-11T21:00:00-04:00",
+      "entry_date": "2026-10-11",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-047",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-12T21:00:00-04:00",
+      "entry_date": "2026-10-12",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-048",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-15T21:00:00-04:00",
+      "entry_date": "2026-10-15",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-049",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-17T21:00:00-04:00",
+      "entry_date": "2026-10-17",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-050",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-18T21:00:00-04:00",
+      "entry_date": "2026-10-18",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-051",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-19T21:00:00-04:00",
+      "entry_date": "2026-10-19",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-052",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-20T21:00:00-04:00",
+      "entry_date": "2026-10-20",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-053",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-23T21:00:00-04:00",
+      "entry_date": "2026-10-23",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-054",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-24T21:00:00-04:00",
+      "entry_date": "2026-10-24",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-055",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-26T21:00:00-04:00",
+      "entry_date": "2026-10-26",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-056",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-27T21:00:00-04:00",
+      "entry_date": "2026-10-27",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-057",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-28T21:00:00-04:00",
+      "entry_date": "2026-10-28",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-058",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-29T21:00:00-04:00",
+      "entry_date": "2026-10-29",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-059",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-30T21:00:00-04:00",
+      "entry_date": "2026-10-30",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-060",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    },
+    {
+      "attack": null,
+      "audio_path": null,
+      "created_at": "2026-10-31T21:00:00-04:00",
+      "entry_date": "2026-10-31",
+      "entry_type": "no_attack",
+      "id": "syn-checkin-061",
+      "processing_error": null,
+      "status": "confirmed",
+      "transcript": null
+    }
+  ],
+  "seed": 20260704,
+  "window_end": "2026-10-31",
+  "window_start": "2026-08-03"
+}

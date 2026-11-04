@@ -1,0 +1,160 @@
+# Quietlog canonical attack-entry fields.
+#
+# Field list follows published headache diaries, in particular:
+#   - The Migraine Trust "Migraine diary" (migrainetrust.org)
+#   - Migraine Canada "Migraine diary" (migrainecanada.org)
+#
+# This file is a record-keeping schema only. It is NOT clinically validated,
+# and Quietlog does not diagnose, interpret, or advise. All fields are
+# nullable: "unknown" (not stated) is always a valid answer, and the
+# extractor must never guess.
+#
+# Conventions:
+#   - type: logical type; see src/quietlog/models.py for validation.
+#   - stated_as: value must be kept exactly as the user said it.
+#   - evidence: extraction must attach an evidence_quote for this field.
+
+version: 1
+
+entry:
+  id:
+    type: string
+    description: UUID hex, assigned at save time.
+  entry_type:
+    type: enum
+    values: [attack, no_attack]
+    description: "'attack' is a migraine attack entry; 'no_attack' is a one-tap daily check-in."
+  created_at:
+    type: datetime
+    description: Local timestamp when the entry was saved (ISO 8601 with offset).
+  entry_date:
+    type: date
+    description: Local calendar day the entry belongs to (date of created_at).
+  audio_path:
+    type: string
+    nullable: true
+    description: Relative path of the saved audio file, if voice input was used.
+  transcript:
+    type: string
+    nullable: true
+    description: Transcribed or typed text of the voice note. Treated as data, never as instructions.
+  status:
+    type: enum
+    values: [in_progress, needs_processing, unconfirmed, confirmed]
+    description: >-
+      in_progress = attack timer running, end not stamped yet;
+      needs_processing = saved but transcription/extraction not complete;
+      unconfirmed = extracted but user has not confirmed; confirmed = user confirmed.
+      no_attack check-ins are created as confirmed (nothing to extract).
+
+attack:
+  # -- onset --
+  time_expression:
+    type: string
+    nullable: true
+    stated_as: true
+    evidence: true
+    description: >-
+      When the attack started, exactly as the user said it
+      ("since 2pm", "this morning"). The model never does date arithmetic;
+      backend code resolves this against created_at.
+  attack_start:
+    type: datetime
+    nullable: true
+    description: Resolved datetime computed by backend code from time_expression.
+  attack_start_precision:
+    type: enum
+    values: [exact, approximate, date_only, unknown]
+    description: >-
+      exact = a specific clock time was stated; approximate = relative/fuzzy
+      ("this morning", "an hour ago"); date_only = only a day was stated;
+      unknown = nothing usable was stated.
+  attack_end:
+    type: datetime
+    nullable: true
+    description: >-
+      When the attack ended, stamped by the one-tap timer (exact on both
+      taps). Never extracted from words; the extraction schema omits it.
+      Null unless the timer was used.
+
+  # -- duration --
+  duration_minutes:
+    type: integer
+    nullable: true
+    evidence: true
+    description: How long the attack lasted (or has lasted so far), in minutes.
+  ongoing:
+    type: boolean
+    nullable: true
+    evidence: true
+    description: True if the attack is still happening at log time.
+
+  # -- severity --
+  severity_function:
+    type: integer
+    nullable: true
+    values: [1, 2, 3]
+    evidence: true
+    description: >-
+      1 = mild, can function; 2 = moderate, activities slowed;
+      3 = severe, cannot do activities. Set only from statements about
+      function or severity.
+  pain_0_10:
+    type: integer
+    nullable: true
+    values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    evidence: true
+    description: >-
+      A 0-10 number only if the user states one. Never converted to or from
+      severity_function.
+
+  # -- symptoms (tri-state: true = stated present, false = explicitly denied,
+  #    null = not mentioned; summary counts only true) --
+  symptoms:
+    aura: { type: boolean, nullable: true, evidence: true }
+    nausea: { type: boolean, nullable: true, evidence: true }
+    vomiting: { type: boolean, nullable: true, evidence: true }
+    light_sensitivity: { type: boolean, nullable: true, evidence: true }
+    sound_sensitivity: { type: boolean, nullable: true, evidence: true }
+    smell_sensitivity: { type: boolean, nullable: true, evidence: true }
+    dizziness: { type: boolean, nullable: true, evidence: true }
+    other:
+      type: list
+      item_type: string
+      stated_as: true
+      evidence: true
+      description: Other symptoms exactly as stated.
+
+  # -- acute medication --
+  acute_medications:
+    type: list
+    description: One item per medication the user says they took for this attack.
+    item:
+      name: { type: string, stated_as: true, evidence: true }
+      dose: { type: string, nullable: true, stated_as: true, evidence: true }
+      time_taken: { type: string, nullable: true, stated_as: true, evidence: true }
+      outcome:
+        type: enum
+        nullable: true
+        values: [relief, partial, none, side_effects, recurrence, unknown]
+        evidence: true
+      second_dose: { type: boolean, nullable: true, evidence: true }
+
+  reported_triggers:
+    type: list
+    item_type: string
+    stated_as: true
+    evidence: true
+    description: Triggers exactly as the user said them. Never inferred or added.
+
+  menstrual_context:
+    type: string
+    nullable: true
+    stated_as: true
+    evidence: true
+    description: Recorded only if the user states it.
+
+  notes:
+    type: string
+    nullable: true
+    description: Remaining relevant text from the transcript.

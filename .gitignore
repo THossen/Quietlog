@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.pytest_cache/
+pytest-of-*/
+.mypy_cache/
+.ruff_cache/
+coverage.xml
+htmlcov/
+
+# Secrets and local config — never commit
+.env
+.env.*
+!.env.example
+
+# Local data — never commit real diary entries, audio, or databases.
+# Only committed synthetic fixtures under data/synthetic/ are allowed.
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+data/audio/
+data/cache/
+data/*.db
+data/*.json
+!data/.gitkeep
+!data/synthetic/
+!data/synthetic/**
+
+# Node / frontend
+node_modules/
+frontend/dist/
+.npm-cache/
+*.local
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Evaluation outputs (regenerable, may embed local model responses)
+reports/*
+!reports/.gitkeep
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+/frontend/.preview-check/
