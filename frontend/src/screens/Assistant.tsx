@@ -36,7 +36,7 @@ import { getLogCoords } from '../location';
 import { useReducedMotionSetting } from '../motion';
 import { buildSummaryHtml } from '../print';
 import { colors, fonts, shadows, sizes } from '../theme';
-import { ErrorText, GhostButton, PrimaryButton, ScalePressable } from '../components/ui';
+import { ErrorText, FilterChip, GhostButton, PrimaryButton, ScalePressable } from '../components/ui';
 import type { RootStackParamList } from '../nav';
 
 const EMPTY_HINT = 'Log how you feel, or ask about your diary.';
@@ -53,7 +53,7 @@ interface ChipAction {
 
 const PROGRESS_STAGES = ['Thinking…', 'Working on it…', 'Still going…'];
 
-const LOG_TOOLS = new Set(['log_attack', 'add_note', 'log_checkin', 'timer_start', 'timer_end', 'set_entry_date']);
+const LOG_TOOLS = new Set(['log_attack', 'add_note', 'log_checkin', 'timer_start', 'timer_end', 'set_entry_date', 'update_entry']);
 
 /** Random hex id (uniqueness per send, not security): no dependency needed. */
 function newRequestId(): string {
@@ -82,16 +82,12 @@ function ActionChips({
   return (
     <View style={styles.chipRow}>
       {chips.map((chip) => (
-        <ScalePressable
+        <FilterChip
           disabled={disabled}
           key={chip.label}
+          label={chip.label}
           onPress={() => onAct(chip)}
-          accessibilityRole="button"
-          accessibilityLabel={chip.label}
-          style={styles.chip}
-        >
-          <Text style={styles.chipText}>{chip.label}</Text>
-        </ScalePressable>
+        />
       ))}
     </View>
   );
@@ -127,7 +123,7 @@ function chipsFor(
   return chips;
 }
 
-function readDetail(action: AgentAction): ReactNode {
+function readDetail(action: AgentAction, onReview: (id: string) => void): ReactNode {
   const data = action.data ?? {};
   if (action.tool === 'timer_status') {
     if (data.running === true) {
@@ -140,7 +136,25 @@ function readDetail(action: AgentAction): ReactNode {
     return <Text style={styles.receiptDetail}>Not running</Text>;
   }
   if (action.tool === 'answer_diary' && typeof data.answer === 'string') {
-    return <Text numberOfLines={4} style={styles.receiptQuote}>{data.answer}</Text>;
+    const citations = data.citations ?? [];
+    return (
+      <>
+        <Text numberOfLines={4} style={styles.receiptQuote}>{data.answer}</Text>
+        {citations.length > 0 ? (
+          <View style={styles.chipWrap}>
+            {citations.map((cite) => (
+              <FilterChip
+                key={cite.entry_id}
+                label={`${cite.date ? formatDay(cite.date) : 'Entry'}${typeof cite.pain === 'number' ? ` · Pain ${cite.pain}/10` : ''}`}
+                onPress={() => onReview(cite.entry_id)}
+                accessibilityLabel={`Open entry from ${cite.date ? formatDay(cite.date) : 'unknown date'}`}
+                style={styles.citationChip}
+              />
+            ))}
+          </View>
+        ) : null}
+      </>
+    );
   }
   if (action.tool === 'get_summary' && typeof data.attack_entries === 'number') {
     return (
@@ -201,7 +215,7 @@ function AssistantBubble({
               {receipt.duration_minutes != null ? <Text style={styles.receiptDetail}>Duration {receipt.duration_minutes} min</Text> : null}
               {receipt.transcript ? <Text numberOfLines={3} style={styles.receiptQuote}>“{receipt.transcript}”</Text> : null}
             </> : null}
-            {!receipt ? readDetail(action) : null}
+            {!receipt ? readDetail(action, onReview) : null}
             {action.entry_id ? (
               <ScalePressable onPress={() => onReview(action.entry_id as string)}
                 accessibilityRole="button" accessibilityLabel="View and edit this entry"
@@ -925,25 +939,19 @@ export default function Assistant() {
                             {(gap.options ?? []).map((option) => {
                               const selected = followAnswers[gap.id] === option;
                               return (
-                                <ScalePressable
+                                <FilterChip
                                   key={option}
+                                  label={option}
+                                  selected={selected}
+                                  disabled={unavailable}
+                                  style={styles.followChip}
                                   onPress={() =>
                                     setFollowAnswers((prev) => ({
                                       ...prev,
                                       [gap.id]: selected ? '' : option,
                                     }))
                                   }
-                                  accessibilityRole="button"
-                                  disabled={unavailable}
-                                  accessibilityState={{ selected, disabled: unavailable }}
-                                  style={[styles.chip, selected && styles.chipSelected]}
-                                >
-                                  <Text
-                                    style={selected ? styles.chipTextSelected : styles.chipText}
-                                  >
-                                    {option}
-                                  </Text>
-                                </ScalePressable>
+                                />
                               );
                             })}
                           </View>
@@ -1106,18 +1114,9 @@ const styles = StyleSheet.create({
   list: { flexGrow: 1, paddingTop: 8, paddingBottom: 20, gap: 20 },
   empty: { marginTop: 28, flexDirection: 'column', gap: 12 },
   hint: { color: colors.dim, fontSize: 16, lineHeight: 24, maxWidth: 460 },
-  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
-  chip: {
-    minHeight: 56,
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    justifyContent: 'center',
-    borderRadius: 28,
-    borderWidth: 1,
-    borderColor: colors.edge,
-    backgroundColor: colors.panelRaised,
-  },
-  chipText: { color: colors.sand, fontSize: 16 },
+  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  citationChip: { flexGrow: 1 },
+  followChip: { flexGrow: 1, minWidth: 76 },
   userRow: { flexDirection: 'row', justifyContent: 'flex-end' },
   userBubble: {
     maxWidth: '85%',
@@ -1184,8 +1183,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingHorizontal: 14,
   },
-  chipSelected: { borderColor: colors.lightAmber, backgroundColor: colors.lightAmber },
-  chipTextSelected: { color: colors.ink, fontSize: 16, fontFamily: fonts.semibold },
   chipsRow: { marginTop: 10 },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   composer: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, marginTop: 10, borderTopWidth: 1, borderTopColor: colors.edge, paddingTop: 12 },

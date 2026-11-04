@@ -19,17 +19,17 @@ import { getLogCoords } from '../location';
 import { useReducedMotionSetting } from '../motion';
 import { colors, fonts, shadows, sizes } from '../theme';
 import ScreenShell from '../components/ScreenShell';
-import { ErrorText, GhostButton, StatusBadge } from '../components/ui';
+import { ErrorText, FilterChip, GhostButton, StatusBadge } from '../components/ui';
 import type { RootStackParamList, TabParamList } from '../nav';
 
 type HistoryFilter = 'all' | 'review' | 'processing' | 'confirmed' | 'checkins';
 
-const FILTERS: Array<{ id: HistoryFilter; label: string }> = [
-  { id: 'all', label: 'All' },
-  { id: 'review', label: 'To review' },
-  { id: 'processing', label: 'Needs processing' },
-  { id: 'confirmed', label: 'Confirmed' },
-  { id: 'checkins', label: 'Check-ins' },
+const FILTERS: Array<{ id: HistoryFilter; label: string; short: string }> = [
+  { id: 'all', label: 'All', short: 'All' },
+  { id: 'review', label: 'To review', short: 'Review' },
+  { id: 'processing', label: 'Needs processing', short: 'Processing' },
+  { id: 'confirmed', label: 'Confirmed', short: 'Confirmed' },
+  { id: 'checkins', label: 'Check-ins', short: 'Check-ins' },
 ];
 
 function matchesFilter(entry: Entry, filter: HistoryFilter): boolean {
@@ -233,18 +233,15 @@ function ReviewListBody() {
           const selected = filter === item.id;
           const count = entries.filter((entry) => matchesFilter(entry, item.id)).length;
           return (
-            <Pressable
+            <FilterChip
               key={item.id}
+              label={item.short}
+              count={count}
+              selected={selected}
               onPress={() => setFilter(item.id)}
-              accessibilityRole="button"
               accessibilityLabel={`${item.label}, ${count} entries`}
-              accessibilityState={{ selected }}
-              style={[styles.chip, selected ? styles.chipSelected : null]}
-            >
-              <Text style={selected ? styles.chipTextSelected : styles.chipText}>
-                {item.label} ({count})
-              </Text>
-            </Pressable>
+              style={styles.chipGrow}
+            />
           );
         })}
       </View>
@@ -297,20 +294,8 @@ export default function ReviewList() {
 const styles = StyleSheet.create({
   column: { flexDirection: 'column', gap: 20, paddingTop: 24 },
   heading: { color: colors.sand, fontSize: 26, fontFamily: fonts.display },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: {
-    minHeight: 48,
-    borderRadius: sizes.radiusPill,
-    borderWidth: 1,
-    borderColor: colors.edge,
-    backgroundColor: colors.panel,
-    paddingHorizontal: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  chipSelected: { borderColor: colors.lightAmber, backgroundColor: colors.lightAmber },
-  chipText: { color: colors.sand, fontSize: 15, fontFamily: fonts.medium },
-  chipTextSelected: { color: colors.ink, fontSize: 15, fontFamily: fonts.semibold },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: -6 },
+  chipGrow: { flexGrow: 1 },
   loading: { color: colors.dim, fontSize: 20, textAlign: 'center' },
   empty: { color: colors.sand, fontSize: 20, textAlign: 'center' },
   monthHeader: {

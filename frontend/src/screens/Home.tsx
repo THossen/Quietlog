@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Animated, AppState, StyleSheet, Text, View } from 'react-native';
-import { ChevronLeft, ChevronRight, Mic } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Mic, Timer } from 'lucide-react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { useFocusEffect, useNavigation, type CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -686,21 +686,35 @@ function HomeBody() {
         </>
       ) : (
         <>
-          <ScalePressable
-            onPress={start}
-            disabled={busy !== null}
-            accessibilityRole="button"
-            accessibilityLabel="Log a headache"
-            style={styles.actionCard}
-          >
-            <View style={styles.actionIcon}>
-              <Mic size={26} color={colors.gold} />
-            </View>
-            <View style={styles.actionTexts}>
-              <Text style={styles.actionTitle}>{busy === 'starting' ? 'Starting…' : 'Log a headache'}</Text>
-              <Text style={styles.actionSub}>One tap. Details can wait.</Text>
-            </View>
-          </ScalePressable>
+          <View style={styles.actionCard}>
+            <ScalePressable
+              onPress={start}
+              disabled={busy !== null}
+              accessibilityRole="button"
+              accessibilityLabel="Log a headache, start the attack timer"
+              style={styles.actionBody}
+            >
+              <View style={styles.actionIcon}>
+                <Timer size={26} color={colors.gold} />
+              </View>
+              <View style={styles.actionTexts}>
+                <Text style={styles.actionTitle}>{busy === 'starting' ? 'Starting…' : 'Log a headache'}</Text>
+                <Text style={styles.actionSub}>Starts the timer. Details can wait.</Text>
+              </View>
+            </ScalePressable>
+            <ScalePressable
+              onPress={onLogAttack}
+              disabled={busy !== null}
+              accessibilityRole="button"
+              accessibilityLabel="Record a voice note instead"
+              style={styles.micButton}
+            >
+              <View style={styles.micCircle}>
+                <Mic size={24} color={colors.ink} />
+              </View>
+              <Text style={styles.micLabel}>Voice</Text>
+            </ScalePressable>
+          </View>
           {timerError ? <ErrorText>{timerError}</ErrorText> : null}
           <View style={styles.actionRow}>
             <View style={styles.actionHalf}>
@@ -910,6 +924,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     ...shadows.card,
   },
+  actionBody: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 16 },
   actionIcon: {
     width: 52,
     height: 52,
@@ -918,6 +933,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  micButton: { alignItems: 'center', justifyContent: 'center', gap: 4, minWidth: 64, minHeight: 64 },
+  micCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: colors.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  micLabel: { color: colors.ink, fontSize: 12, fontFamily: fonts.semibold },
   actionTexts: { flex: 1, flexDirection: 'column', gap: 2 },
   actionTitle: { color: colors.ink, fontSize: 24, fontFamily: fonts.display },
   actionSub: { color: colors.ink, fontSize: 16, opacity: 0.75 },

@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { printToFileAsync } from 'expo-print';
 import { isAvailableAsync, shareAsync } from 'expo-sharing';
 import { useFocusEffect } from '@react-navigation/native';
@@ -8,7 +8,7 @@ import { draftNarrative, getSummary } from '../api';
 import { buildSummaryHtml, formatDuration, symptomLabel } from '../print';
 import { colors, fonts, shadows, sizes } from '../theme';
 import ScreenShell from '../components/ScreenShell';
-import { ErrorText, GhostButton, PrimaryButton } from '../components/ui';
+import { ErrorText, FilterChip, GhostButton, PrimaryButton } from '../components/ui';
 
 type WindowDays = 30 | 60 | 90;
 
@@ -106,21 +106,16 @@ function SummaryBody() {
   return (
     <View style={styles.column}>
       <View style={styles.windowRow}>
-        {([30, 60, 90] as const).map((days) => {
-          const selected = windowDays === days;
-          return (
-            <Pressable
-              key={days}
-              onPress={() => setWindowDays(days)}
-              accessibilityRole="button"
-              accessibilityLabel={`Last ${days} days`}
-              accessibilityState={{ selected }}
-              style={[styles.window, selected ? styles.windowSelected : null]}
-            >
-              <Text style={selected ? styles.windowTextSelected : styles.windowText}>{days} days</Text>
-            </Pressable>
-          );
-        })}
+        {([30, 60, 90] as const).map((days) => (
+          <FilterChip
+            key={days}
+            label={`${days} days`}
+            selected={windowDays === days}
+            onPress={() => setWindowDays(days)}
+            accessibilityLabel={`Last ${days} days`}
+            style={styles.window}
+          />
+        ))}
       </View>
 
       <PrimaryButton
@@ -341,19 +336,7 @@ const styles = {
   column: { flexDirection: 'column', gap: 18, paddingTop: 24 } as const,
   loading: { color: colors.dim, fontSize: 20, textAlign: 'center' } as const,
   windowRow: { flexDirection: 'row', gap: 8 } as const,
-  window: {
-    flex: 1,
-    minHeight: sizes.touch,
-    borderRadius: sizes.radiusSmall,
-    borderWidth: 1,
-    borderColor: colors.edge,
-    backgroundColor: colors.panelRaised,
-    alignItems: 'center',
-    justifyContent: 'center',
-  } as const,
-  windowSelected: { borderColor: colors.lightAmber, backgroundColor: colors.lightAmber } as const,
-  windowText: { color: colors.sand, fontSize: sizes.body } as const,
-  windowTextSelected: { color: colors.ink, fontSize: sizes.body, fontFamily: fonts.semibold } as const,
+  window: { flex: 1 } as const,
   range: { color: colors.sand, fontSize: 24, fontFamily: fonts.display } as const,
   disclaimer: { color: colors.dim, fontSize: 16, marginTop: -8 } as const,
   card: {

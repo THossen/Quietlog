@@ -413,13 +413,21 @@ export function receiptFromEntry(entry: Entry): EntryReceipt {
   };
 }
 
+export interface AgentCitation {
+  entry_id: string;
+  date: string | null;
+  pain?: number | null;
+  duration_minutes?: number | null;
+  medications?: string[];
+}
+
 export interface AgentAction {
   tool: string;
   ok: boolean;
   label: string;
   entry_id: string | null;
   followups?: AgentFollowup[];
-  data?: Record<string, unknown> & { receipt?: EntryReceipt };
+  data?: Record<string, unknown> & { receipt?: EntryReceipt; citations?: AgentCitation[] };
   status?: string;
 }
 

@@ -66,11 +66,13 @@ floating button and just say what happened — *"bad one since lunch, took
 Excedrin"* — or tap a quick action and it acts:
 
 - **Logs for you.** Starts/stops attack timers, saves voice and typed notes,
-  records no-headache days, attaches notes to the right attack, corrects an
+  records no-headache days, attaches notes to the right attack, corrects
+  recorded fields (pain, duration, medication outcome) and an
   entry's date, and answers its own follow-up questions into the entry.
 - **Asks, doesn't guess.** When "that one" could mean two entries, it asks one
   clarifying question. It answers questions about your diary ("how many
-  attacks this month?") from your actual records, and drafts the appointment
+  attacks this month?") from your actual records — with tappable cited
+  entries under the answer — and drafts the appointment
   summary paragraph from the computed numbers.
 - **Remembers safely.** Across turns it tracks the running attack, the entry
   being discussed, and pending follow-ups as structured state, revalidated
@@ -95,7 +97,7 @@ snapped at log time; nothing in that chain can lose what you saved.
 
 ### What the agent can do
 
-Fourteen validated tools, dispatched from what you say:
+Fifteen validated tools, dispatched from what you say:
 
 | You say | Tool(s) | Result |
 |---|---|---|
@@ -104,24 +106,27 @@ Fourteen validated tools, dispatched from what you say:
 | "Also, I took ibuprofen at noon" | `add_note` | Appended to the same attack |
 | "Start a timer" / "It's over" | `timer_start` / `timer_end` / `timer_status` | Attack timed live |
 | "Pain was 7 out of 10" (follow-up) | `answer_followups` | Answer folded into the entry |
-| "How many attacks this month?" | `answer_diary` / `get_summary` | Answered from your records |
+| "How many attacks this month?" | `answer_diary` / `get_summary` | Answer + tappable cited entries |
 | "Draft my appointment summary" | `draft_narrative` | Paragraph from computed numbers |
 | "Save that as a PDF" | `save_pdf` | One-page PDF + share sheet |
 | "Find last Tuesday's headache" | `find_entries` / `get_entry` | Matching entry shown |
 | "Actually, that was yesterday" | `set_entry_date` | Whole attack moved to that day |
+| "Actually, the pain was 8 / the Excedrin helped" | `update_entry` | Recorded fields corrected in place |
 
 ## Features
 
 - **Capture your way.** Voice notes (automatic transcription, transcripts persist
   the moment they arrive), typed notes, a running attack timer (start → add notes
-  → end), and one-tap no-headache check-ins.
+  → end), and one-tap no-headache check-ins. On Home, the amber card's body
+  starts the timer while its separate Voice button opens voice capture.
 - **Review, don't trust.** Every extracted field sits next to the user's words;
   entries stay *unconfirmed* until reviewed. Confirmed history is closed — the
-  assistant can't append to it or re-extract it.
-- **History, Insights, Reports.** Month-grouped history, a monthly dashboard
-  (attack days, average pain, logged days, interactive calendar), 90-day
+  assistant can't append to it, correct it, or re-extract it.
+- **History, Insights, Reports.** Month-grouped history with status filters (to review, needs processing,
+  confirmed, check-ins — check-ins included), a monthly dashboard (attack
+  days, average pain, logged days, interactive calendar with today marked), 90-day
   insights, and a printable one-page summary (30/60/90-day windows) shareable as
-  PDF.
+  PDF, with a pre-share checklist (window, unconfirmed entries, drafted paragraph).
 - **Weather, fail-soft.** Temperature, humidity, and pressure tendency are
   captured at log time (and backfilled for backdated attacks). Missing
   weather never blocks a save.
@@ -159,8 +164,13 @@ multi-turn evaluation suite, not bolted on.
   separated transcription/extraction with per-recording state and crash-safe
   recovery, and a bounded live-model multi-turn evaluation
   (`scripts/live_agent_eval.py`, isolated synthetic databases only).
+- **Latest:** conversational field corrections (`update_entry`: pain, duration,
+  severity, notes, medication outcome — unconfirmed entries only), cited diary
+  answers with tappable entry chips, History status filters with check-ins, a
+  shared chip/badge design system, and a Home action card that separates the
+  attack timer (card body) from voice capture (Voice button).
 
-Current verification: **266 `pytest` passing**, TypeScript (`tsc --noEmit`)
+Current verification: **270 `pytest` passing**, TypeScript (`tsc --noEmit`)
 clean, iOS bundle (`expo export`) clean. On-device verification of the newest
 flows is ongoing.
 
@@ -184,6 +194,7 @@ Quietlog/
   data/synthetic/             committed synthetic fixtures (diary, aggregates, transcripts)
   frontend/                   Expo mobile app (TypeScript + React Native, SDK 58)
     src/screens/              Home · Capture · ReviewList (History) · Insights · Summary (Reports) · Assistant
+    src/components/           shared chips, badges, buttons, screen shell
     src/api.ts · voice.ts     typed backend client · voice recovery driver
     src/audio.ts · print.ts   mic → 16 kHz mono WAV in-app · one-page print HTML
 ```

@@ -12,10 +12,10 @@ from fastapi import HTTPException
 from quietlog import agent, db as db_mod
 from quietlog import routes
 from quietlog.llm_service import LLMError
-from quietlog.models import AttackDetails, Entry
+from quietlog.models import AcuteMedication, AttackDetails, Entry
 from quietlog.processing import process_entry
 from quietlog.settings import Settings
-from quietlog.types import EntryStatus, EntryType
+from quietlog.types import EntryStatus, EntryType, MedicationOutcome
 
 
 @pytest.fixture(autouse=True)
@@ -1189,6 +1189,94 @@ def test_add_note_refuses_confirmed_entry(fx):
     assert stored.status == EntryStatus.CONFIRMED
     assert stored.transcript == "migraine since lunch"
     assert stored.attack.pain_0_10 == 6
+
+
+def _unconfirmed_attack(fx, **attack_kwargs):
+    entry = Entry(
+        entry_type=EntryType.ATTACK,
+        created_at=datetime.now(timezone.utc) - timedelta(days=1),
+        transcript="migraine since lunch",
+        status=EntryStatus.UNCONFIRMED,
+        attack=AttackDetails(**attack_kwargs),
+    )
+    db_mod.save_entry(fx["conn"], entry)
+    return entry
+
+
+def test_update_entry_corrects_fields(fx):
+    entry = _unconfirmed_attack(
+        fx,
+        pain_0_10=6,
+        acute_medications=[AcuteMedication(name="Excedrin", outcome=MedicationOutcome.UNKNOWN)],
+    )
+    result, _ = _run(
+        fx, "actually the pain was 8 and the Excedrin helped",
+        [_action("update_entry", {
+            "entry_id": entry.id,
+            "pain_0_10": 8,
+            "duration_minutes": 90,
+            "medication": {"name": "excedrin", "outcome": "relief"},
+        }), _reply("Updated.")])
+    assert result.actions[0].ok is True
+    assert result.actions[0].tool == "update_entry"
+    stored = db_mod.get_entry(fx["conn"], entry.id)
+    assert stored.attack.pain_0_10 == 8
+    assert stored.attack.duration_minutes == 90
+    assert stored.attack.acute_medications[0].outcome == MedicationOutcome.RELIEF
+    assert "pain_0_10" in stored.attack.edited_fields
+    assert "duration_minutes" in stored.attack.edited_fields
+    assert "acute_medications" in stored.attack.edited_fields
+    assert result.actions[0].data["receipt"]["pain"] == 8
+
+
+def test_update_entry_refuses_confirmed_and_invalid(fx):
+    entry = _saved_attack(fx)  # confirmed by default
+    result, _ = _run(
+        fx, "change the pain to 9",
+        [_action("update_entry", {"entry_id": entry.id, "pain_0_10": 9}),
+         _reply("Cannot.")])
+    assert result.actions[0].ok is False
+    assert db_mod.get_entry(fx["conn"], entry.id).attack.pain_0_10 == 6
+
+    open_entry = _unconfirmed_attack(fx, pain_0_10=5)
+    for args in [
+        {"entry_id": open_entry.id, "pain_0_10": 11},
+        {"entry_id": open_entry.id, "pain_0_10": "8"},
+        {"entry_id": open_entry.id, "severity_function": 4},
+        {"entry_id": open_entry.id, "diagnosis": "migraine"},
+        {"entry_id": open_entry.id, "medication": {"name": "Nope", "outcome": "relief"}},
+        {"entry_id": open_entry.id, "medication": {"name": "Excedrin", "outcome": "great"}},
+    ]:
+        result, _ = _run(
+            fx, "fix it",
+            [_action("update_entry", args), _reply("No.")])
+        assert result.actions[0].ok is False, args
+    assert db_mod.get_entry(fx["conn"], open_entry.id).attack.pain_0_10 == 5
+
+
+def test_update_entry_repeat_in_turn_applies_once(fx):
+    entry = _unconfirmed_attack(fx, pain_0_10=6)
+    args = {"entry_id": entry.id, "pain_0_10": 8}
+    result, _ = _run(
+        fx, "pain was 8",
+        [_action("update_entry", args), _action("update_entry", args),
+         _reply("Updated.")])
+    assert len(result.actions) == 1
+    assert db_mod.get_entry(fx["conn"], entry.id).attack.pain_0_10 == 8
+
+
+def test_answer_diary_returns_citations(fx):
+    entry = _saved_attack(fx)
+    result, _ = _run(
+        fx, "how many migraines?",
+        [_action("answer_diary", {"question": "how many migraines?"}),
+         "One migraine, yesterday.",
+         _reply("You had one.")])
+    assert result.actions[0].ok is True
+    citations = result.actions[0].data["citations"]
+    assert citations[0]["entry_id"] == entry.id
+    assert citations[0]["date"] == entry.entry_date.isoformat()
+    assert citations[0]["pain"] == 6
 
 
 def test_cannot_restart_ended_attack(fx):

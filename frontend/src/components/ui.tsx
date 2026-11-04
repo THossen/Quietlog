@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Check } from 'lucide-react-native';
 import { useReducedMotionSetting } from '../motion';
 import { colors, fonts, shadows, sizes } from '../theme';
 
@@ -101,6 +102,54 @@ export function GhostButton({
   );
 }
 
+/**
+ * Shared chip: filter toggles (History), segmented choices (Reports
+ * windows, Assistant follow-ups), and one-tap actions (Assistant quick
+ * chips) all use this one shape so selection reads the same everywhere.
+ */
+export function FilterChip({
+  label,
+  count,
+  selected = false,
+  disabled = false,
+  onPress,
+  accessibilityLabel,
+  style,
+}: {
+  label: string;
+  count?: number;
+  selected?: boolean;
+  disabled?: boolean;
+  onPress: () => void;
+  accessibilityLabel?: string;
+  style?: StyleProp<ViewStyle>;
+}) {
+  return (
+    <ScalePressable
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityState={{ selected, disabled }}
+      style={[
+        styles.chip,
+        selected ? styles.chipSelected : null,
+        disabled ? styles.disabled : null,
+        count !== undefined ? styles.chipWithCount : null,
+        style,
+      ]}
+    >
+      {selected && count === undefined ? <Check size={14} color={colors.lightAmber} strokeWidth={3} /> : null}
+      <Text style={selected ? styles.chipTextSelected : styles.chipText}>{label}</Text>
+      {count !== undefined ? (
+        <View style={[styles.chipCount, selected ? styles.chipCountSelected : null]}>
+          <Text style={selected ? styles.chipCountTextSelected : styles.chipCountText}>{count}</Text>
+        </View>
+      ) : null}
+    </ScalePressable>
+  );
+}
+
 export function ErrorText({ children }: { children: ReactNode }) {
   return (
     <Text role="alert" style={styles.error}>
@@ -176,17 +225,52 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
+  chip: {
+    minHeight: 50,
+    flexDirection: 'row',
+    gap: 7,
+    borderRadius: sizes.radiusPill,
+    borderWidth: 1,
+    borderColor: colors.edge,
+    borderTopColor: colors.rise,
+    backgroundColor: colors.panelSoft,
+    paddingLeft: 15,
+    paddingRight: 15,
+    paddingVertical: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chipSelected: {
+    borderColor: colors.gold,
+    borderTopColor: colors.lightAmber,
+    backgroundColor: colors.goldWash,
+  },
+  chipWithCount: { paddingRight: 7 },
+  chipText: { color: colors.dim, fontSize: 15, fontFamily: fonts.medium, letterSpacing: 0.2, textAlign: 'center' },
+  chipTextSelected: { color: colors.lightAmber, fontSize: 15, fontFamily: fonts.semibold, letterSpacing: 0.2, textAlign: 'center' },
+  chipCount: {
+    minWidth: 25,
+    borderRadius: sizes.radiusPill,
+    borderWidth: 1,
+    borderColor: colors.edge,
+    backgroundColor: colors.panelRaised,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    alignItems: 'center',
+  },
+  chipCountSelected: { backgroundColor: colors.lightAmber, borderColor: colors.lightAmber },
+  chipCountText: { color: colors.dim, fontSize: 13, fontFamily: fonts.medium, fontVariant: ['tabular-nums'] },
+  chipCountTextSelected: { color: colors.ink, fontSize: 13, fontFamily: fonts.bold, fontVariant: ['tabular-nums'] },
   badge: {
     borderWidth: 1,
     borderRadius: sizes.radiusPill,
     paddingHorizontal: 11,
     paddingVertical: 5,
-    backgroundColor: colors.panelSoft,
   },
-  badgeGold: { borderColor: colors.gold },
-  badgeClay: { borderColor: colors.clay },
-  badgeDim: { borderColor: colors.edge },
-  badgeSage: { borderColor: colors.sage },
+  badgeGold: { borderColor: colors.gold, backgroundColor: colors.goldWash },
+  badgeClay: { borderColor: colors.clay, backgroundColor: colors.clayWash },
+  badgeDim: { borderColor: colors.edge, backgroundColor: colors.panelSoft },
+  badgeSage: { borderColor: colors.sage, backgroundColor: colors.sageWash },
   badgeText: { fontSize: 13, fontFamily: fonts.medium },
   goldText: { color: colors.gold },
   clayText: { color: colors.clay },

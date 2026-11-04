@@ -35,7 +35,7 @@ from .processing import append_followup_answers
 from .processing import process_entry as real_process_entry
 from .settings import Settings
 from .summary import compute_summary
-from .types import EntryStatus, EntryType, TimePrecision
+from .types import EntryStatus, EntryType, MedicationOutcome, TimePrecision
 
 __all__ = [
     "AGENT_PROMPT_VERSION",
@@ -45,7 +45,7 @@ __all__ = [
     "run_agent",
 ]
 
-AGENT_PROMPT_VERSION = "agent-v5"
+AGENT_PROMPT_VERSION = "agent-v6"
 MAX_ROUNDS = 4
 MAX_HISTORY = 10
 
@@ -69,6 +69,7 @@ Tools:
 - find_entries {"date_from": "<YYYY-MM-DD>", "date_to": "<YYYY-MM-DD>", "contains": "<words>", "limit": 5} — search diary entries. All filters optional; use it before asking about an older note.
 - get_entry {"entry_id": "<id>"} — fetch one attack entry with its receipt. Use it to cite "which entry" or to hand the user an entry to review.
 - set_entry_date {"entry_id": "<id>", "date": "<YYYY-MM-DD>"} — move an entry to another day (today or past). The whole attack interval moves together; it changes diary attribution, not within-day timing.
+- update_entry {"entry_id": "<id>", "pain_0_10": 0-10, "duration_minutes": <minutes>, "severity_function": 1-3, "notes": "<text>", "medication": {"name": "<recorded name>", "outcome": "relief|partial|none|side_effects|recurrence|unknown"}} — correct fields already recorded on ONE unconfirmed attack. All fields except entry_id are optional; include only what the user corrected.
 
 Rules:
 - Reads need no confirmation. For writes, use the user's words from this conversation.
@@ -89,6 +90,7 @@ Rules:
 - "Never mind" never deletes anything. If nothing was written, say so briefly. If something was written, say it is kept and call get_entry so the user can review or edit it.
 - Bare follow-up details ("also, I took ibuprofen at noon", "add that to the same headache") belong to the same attack: the running timer first, else the discussed entry. With neither, call find_entries and ask which one.
 - Date corrections ("actually that was yesterday") resolve against Current time above, then call set_entry_date. Never claim a move happened without calling it; if no date can be determined, ask for the day.
+- Field corrections ("actually the pain was 8", "it lasted two hours", "the Excedrin did help") call update_entry on the discussed entry — do not re-log or append a note to change a recorded value. Map "helped" to relief, "helped a bit" to partial, "didn't help" to none, "side effects" to side_effects. Confirmed entries refuse updates; then say it can be edited in review. Diary answers may cite entries: name their dates in your reply.
 - Follow-up questions are optional extras the app shows below your reply. Never demand answers, never ask the same question twice, and never hold a save waiting for details — log first, always."""
 
 
@@ -461,6 +463,52 @@ def _tool_timer_status(conn, settings: Settings, args: dict[str, Any],
             "data": {"running": True, "started": start.isoformat(timespec="minutes")}}
 
 
+def _tool_update_entry(conn, settings: Settings, args: dict[str, Any],
+                       process_entry_fn, coords=None) -> dict[str, Any]:
+    """Correct recorded fields on one unconfirmed attack, in place.
+
+    This is the conversational equivalent of the Review editor: the user's
+    stated value wins, changed fields are marked edited so re-extraction
+    preserves them, and stale evidence for them is dropped. It never appends
+    transcript text (add_note does that) and never touches confirmed history.
+    """
+    entry = db_mod.get_entry(conn, args["entry_id"])
+    if entry is None or entry.entry_type != EntryType.ATTACK:
+        raise ValueError("no such attack entry")
+    if entry.status == EntryStatus.CONFIRMED:
+        raise ValueError(
+            "that entry is confirmed; corrections go through the review editor")
+    fields = [key for key in
+              ("pain_0_10", "duration_minutes", "severity_function", "notes", "medication")
+              if args.get(key) is not None]
+    if not fields:
+        raise ValueError("nothing to correct: name the field and its new value")
+    attack = entry.attack or AttackDetails()
+    entry.attack = attack
+    changed: list[str] = []
+    for key in fields:
+        if key == "medication":
+            med_args = args["medication"]
+            wanted = med_args["name"].strip().lower()
+            match = next(
+                (m for m in attack.acute_medications if m.name.strip().lower() == wanted),
+                None)
+            if match is None:
+                raise ValueError(f"no medication named {med_args['name']!r} on this entry")
+            match.outcome = MedicationOutcome(med_args["outcome"])
+            changed.append("acute_medications")
+            attack.evidence.pop("acute_medications", None)
+            continue
+        setattr(attack, key, args[key].strip() if key == "notes" else args[key])
+        changed.append(key)
+        attack.evidence.pop(key, None)
+        if key in attack.unsupported_fields:
+            attack.unsupported_fields.remove(key)
+    mark_edited(attack, changed)
+    db_mod.save_entry(conn, entry)
+    return _saved_result(entry, "Entry updated")
+
+
 def _tool_answer_diary(conn, settings: Settings, args: dict[str, Any],
                        process_entry_fn, coords=None, http_post=None) -> dict[str, Any]:
     question = str(args.get("question") or "").strip()
@@ -473,10 +521,22 @@ def _tool_answer_diary(conn, settings: Settings, args: dict[str, Any],
     start_date = end_date - timedelta(days=window_days - 1)
     entries = db_mod.list_entries(conn, start=start_date, end=end_date)
     result = assist.ask_diary(question, entries, settings, http_post=http_post)
+    citations = [
+        {"entry_id": entry.id,
+         "date": entry.entry_date.isoformat() if entry.entry_date else None,
+         "pain": entry.attack.pain_0_10 if entry.attack else None,
+         "duration_minutes": entry.attack.duration_minutes if entry.attack else None,
+         "medications": ([m.name for m in entry.attack.acute_medications]
+                         if entry.attack else [])}
+        for entry in entries
+        if entry.entry_type == EntryType.ATTACK and entry.entry_date is not None
+    ][:5]
     return {"ok": True, "label": "Diary answer",
             "answer": result.answer, "entries_consulted": result.entries_consulted,
+            "citations": citations,
             "data": {"answer": result.answer,
-                     "entries_consulted": result.entries_consulted}}
+                     "entries_consulted": result.entries_consulted,
+                     "citations": citations}}
 
 
 class _ToolArgs(BaseModel):
@@ -594,6 +654,60 @@ class _GetEntryArgs(_ToolArgs):
     entry_id: str = Field(pattern=_ENTRY_ID_PATTERN)
 
 
+class _MedicationCorrection(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=100)
+    outcome: str
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def _strip_name(cls, value: Any) -> Any:
+        return _stripped(value)
+
+    @field_validator("outcome")
+    @classmethod
+    def _outcome_ok(cls, value: str) -> str:
+        if value not in {item.value for item in MedicationOutcome}:
+            raise ValueError("outcome must be relief, partial, none, side_effects, recurrence, or unknown")
+        return value
+
+
+class _UpdateEntryArgs(_ToolArgs):
+    entry_id: str = Field(pattern=_ENTRY_ID_PATTERN)
+    pain_0_10: Optional[StrictInt] = None
+    duration_minutes: Optional[StrictInt] = None
+    severity_function: Optional[StrictInt] = None
+    notes: Optional[str] = Field(default=None, min_length=1, max_length=2000)
+    medication: Optional[_MedicationCorrection] = None
+
+    @field_validator("notes", mode="before")
+    @classmethod
+    def _strip_notes(cls, value: Any) -> Any:
+        return _stripped(value)
+
+    @field_validator("pain_0_10")
+    @classmethod
+    def _pain_ok(cls, value: Optional[int]) -> Optional[int]:
+        if value is not None and not 0 <= value <= 10:
+            raise ValueError("pain_0_10 must be 0..10")
+        return value
+
+    @field_validator("duration_minutes")
+    @classmethod
+    def _duration_ok(cls, value: Optional[int]) -> Optional[int]:
+        if value is not None and not 1 <= value <= 10080:
+            raise ValueError("duration_minutes must be 1..10080")
+        return value
+
+    @field_validator("severity_function")
+    @classmethod
+    def _severity_ok(cls, value: Optional[int]) -> Optional[int]:
+        if value is not None and not 1 <= value <= 3:
+            raise ValueError("severity_function must be 1..3")
+        return value
+
+
 class _SetEntryDateArgs(_ToolArgs):
     entry_id: str = Field(pattern=_ENTRY_ID_PATTERN)
     date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
@@ -625,6 +739,7 @@ _TOOL_ARGS: dict[str, type[_ToolArgs]] = {
     "find_entries": _FindEntriesArgs,
     "get_entry": _GetEntryArgs,
     "set_entry_date": _SetEntryDateArgs,
+    "update_entry": _UpdateEntryArgs,
 }
 
 
@@ -717,12 +832,13 @@ def _write_key(name: str, args: dict[str, Any]) -> str:
     """
     parts = [name]
     entry_id = args.get("entry_id")
-    if name in {"answer_followups", "add_note", "timer_start", "set_entry_date"} and entry_id:
+    if name in {"answer_followups", "add_note", "timer_start", "set_entry_date", "update_entry"} and entry_id:
         parts.append(str(entry_id))
     if name == "log_attack" and args.get("new_attack") is True:
         parts.append("new")
-    if name in {"answer_followups", "add_note"}:
-        content = args.get("transcript", args.get("answers"))
+    if name in {"answer_followups", "add_note", "update_entry"}:
+        content = (args.get("transcript", args.get("answers")) if name != "update_entry"
+                   else {k: v for k, v in args.items() if k != "entry_id"})
         digest = hashlib.sha256(
             json.dumps(content, sort_keys=True, default=str).encode("utf-8")
         ).hexdigest()[:12]
@@ -876,6 +992,7 @@ _TOOLS: dict[str, Callable[..., dict[str, Any]]] = {
     "find_entries": _tool_find_entries,
     "get_entry": _tool_get_entry,
     "set_entry_date": _tool_set_entry_date,
+    "update_entry": _tool_update_entry,
 }
 
 _NEEDS_HTTP_POST = {_tool_answer_diary, _tool_draft_narrative}
@@ -1014,7 +1131,7 @@ def run_agent(
             result = {"ok": False, "error": str(exc)[:200]}
             if not isinstance(exc, ValueError):
                 logger.exception("agent tool %s failed unexpectedly", name)
-        if result.get("ok") and name in {"log_attack", "add_note", "log_checkin", "timer_start", "timer_end", "answer_followups", "save_pdf", "set_entry_date"}:
+        if result.get("ok") and name in {"log_attack", "add_note", "log_checkin", "timer_start", "timer_end", "answer_followups", "save_pdf", "set_entry_date", "update_entry"}:
             executed_writes[write_key] = result
             if name == "log_attack" and result.get("entry_id") and isinstance(
                 args.get("transcript"), str
