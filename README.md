@@ -1,7 +1,8 @@
 # Quietlog
 
-One-tap migraine attack logging: tap **Log attack**, speak for ten seconds, get a
-**one-page printable summary** for your next appointment.
+An **agentic migraine diary**: tap **Log attack**, speak for ten seconds — or just
+tell the assistant — and get a **one-page printable summary** for your next
+appointment. Quietlog's agent keeps the diary for you; you only confirm it.
 
 **The problem.** Doctors ask people with migraines to keep a diary, but the worst
 moment to write one is during an attack — exactly when the data is most valuable.
@@ -11,27 +12,57 @@ People reconstruct it from memory days later, or not at all.
 or typed text is transcribed, structured into diary fields, shown next to the
 user's own words for confirmation, and counted into a printable summary. Attacks
 can also be logged with a start/end timer, from a chat-style assistant, or with a
-single tap ("no headache today"). Log-time weather is snapped alongside.
+single tap ("no headache today"). Log-time weather is snapped alongside — and
+when processing fails, the app quietly keeps retrying in the background instead
+of asking you to redo anything.
 
 **What Quietlog never does.** It does not diagnose, interpret, or advise. It never
 generates medical advice, suggests triggers to avoid, recommends or comments on
 medication, or judges patterns. The only model output in the product is structured
-extraction from the user's own words plus tightly bounded assistant tool calls,
-The one piece of model-written prose — an optional appointment paragraph the user drafts, reviews, and chooses to include — is labeled as AI-drafted in the PDF.
+extraction from the user's own words plus tightly bounded assistant tool calls.
+The one piece of model-written prose — an optional appointment paragraph the
+user drafts, reviews, and chooses to include — is labeled as AI-drafted in the
+PDF.
 
 > Quietlog records what you tell it. It does not give medical advice. If this feels
 > like an emergency, contact your local emergency services.
+
+## Meet the agent
+
+Quietlog is built around an assistant agent, not a form. Open it from the
+floating button and just say what happened — *"bad one since lunch, took
+Excedrin"* — or tap a quick action and it acts:
+
+- **Logs for you.** Starts/stops attack timers, saves voice and typed notes,
+  records no-headache days, attaches notes to the right attack, corrects an
+  entry's date, and answers its own follow-up questions into the entry.
+- **Asks, doesn't guess.** When "that one" could mean two entries, it asks one
+  clarifying question. It answers questions about your diary ("how many
+  attacks this month?") from your actual records, and drafts the appointment
+  summary paragraph from the computed numbers.
+- **Remembers safely.** Across turns it tracks the running attack, the entry
+  being discussed, and pending follow-ups as structured state, revalidated
+  against the database every turn — never trusting ids echoed in chat text.
+- **Receipts, not vibes.** Every confirmation is generated from the actual
+  tool result; a failed write never reports "saved." Requests and recordings
+  carry stable ids, so a lost response replays the original result instead
+  of double-logging.
+- **Works while you don't.** Transcription and extraction run save-first and
+  recover automatically — bounded retries with backoff, resumed after app
+  restarts and screen changes. Common actions (start/stop timer, check-in)
+  skip the model entirely and run instantly.
+
+The agent's tools are validated server-side with strict argument schemas, and
+its boundaries are enforced in code, not just prompting: no diagnoses, no
+treatment advice, no invented details, and confirmed history it cannot touch.
 
 ## Features
 
 - **Capture your way.** Voice notes (automatic transcription, transcripts persist
   the moment they arrive), typed notes, a running attack timer (start → add notes
   → end), and one-tap no-headache check-ins.
-- **Chat assistant.** A floating assistant that can log attacks, start/stop
-  timers, add notes, answer follow-up questions, and answer questions about your
-  own diary — using validated tools only, asking for clarification instead of
-  guessing when "that one" is ambiguous. Requests are safe to retry: a lost
-  response replays the original result instead of double-saving.
+- **Chat assistant.** The floating agent above — log, ask, and manage your
+  diary conversationally, with quick actions that skip the model entirely.
 - **Review, don't trust.** Every extracted field sits next to the user's words;
   entries stay *unconfirmed* until reviewed. Confirmed history is closed — the
   assistant can't append to it or re-extract it.
@@ -50,7 +81,9 @@ The one piece of model-written prose — an optional appointment paragraph the u
 ## What was built during the hackathon
 
 Built for the Meta Global AI Developer Hackathon. All code was written during the
-hackathon; no third-party code was copied.
+hackathon; no third-party code was copied. The agentic assistant — bounded tool
+loop, idempotent turns, honest receipts — was designed and hardened against a
+multi-turn evaluation suite, not bolted on.
 
 - **M1 (complete):** data model, `schema/fields.yaml`, synthetic diary generator
   with planted aggregates, deterministic summary calculations, unit tests.
