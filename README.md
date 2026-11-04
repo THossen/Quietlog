@@ -115,8 +115,6 @@ Fourteen validated tools, dispatched from what you say:
 - **Capture your way.** Voice notes (automatic transcription, transcripts persist
   the moment they arrive), typed notes, a running attack timer (start → add notes
   → end), and one-tap no-headache check-ins.
-- **Chat assistant.** The floating agent above — log, ask, and manage your
-  diary conversationally, with quick actions that skip the model entirely.
 - **Review, don't trust.** Every extracted field sits next to the user's words;
   entries stay *unconfirmed* until reviewed. Confirmed history is closed — the
   assistant can't append to it or re-extract it.
@@ -125,8 +123,8 @@ Fourteen validated tools, dispatched from what you say:
   insights, and a printable one-page summary (30/60/90-day windows) shareable as
   PDF.
 - **Weather, fail-soft.** Temperature, humidity, and pressure tendency are
-  captured at log time (and backfilled for backdated attacks). No weather never
-  blocks a save.
+  captured at log time (and backfilled for backdated attacks). Missing
+  weather never blocks a save.
 - **Recovery without re-recording.** Transcription/extraction failures retry
   with bounded backoff; pending voice work resumes after app restarts and
   screen changes. A failed recording is always retryable as-is — you never have
@@ -162,7 +160,7 @@ multi-turn evaluation suite, not bolted on.
   recovery, and a bounded live-model multi-turn evaluation
   (`scripts/live_agent_eval.py`, isolated synthetic databases only).
 
-Current verification: **265 `pytest` passing**, TypeScript (`tsc --noEmit`)
+Current verification: **266 `pytest` passing**, TypeScript (`tsc --noEmit`)
 clean, iOS bundle (`expo export`) clean. On-device verification of the newest
 flows is ongoing.
 
@@ -173,47 +171,32 @@ flows is ongoing.
 ```
 Quietlog/
   schema/fields.yaml          canonical field list (record-keeping schema)
-  src/quietlog/
-    models.py                 Pydantic data model (entries, attacks, recordings)
-    db.py                     SQLite persistence (stdlib sqlite3)
-    time_resolve.py           resolves stated time expressions, no date arithmetic by the model
-    summary.py                deterministic summary calculations (no model involved)
-    main.py                   FastAPI app factory
-    routes.py                 capture/review/timer/transcribe endpoints (save-first)
+  src/quietlog/               FastAPI backend (Python)
+    agent.py                  bounded assistant tool loop (validated args, retries-safe)
     processing.py             transcribe → extract → verify pipeline, overlap-safe
-    settings.py               server settings from environment
+    routes.py                 capture/review/timer/transcribe endpoints (save-first)
     llm_service.py            Muse Spark structured extraction + response cache
     transcribe_service.py     Muse Voice Transcribe + response cache
     verifier.py               deterministic quote verifier + repair step
-    agent.py                  bounded assistant tool loop (validated args, retries-safe)
-    assist.py                 ask-your-diary + narrative drafting over stored entries
-    weather_service.py        Open-Meteo snapshots (fail-soft, no key)
-    cache.py                  response cache helpers
-  scripts/
-    make_synthetic_diary.py   synthetic 90-day diary + 66 labelled transcripts
-    evaluate.py               one-command evaluation, writes a Markdown report
-    live_agent_eval.py        bounded live-model multi-turn eval (isolated DBs)
-    seed_demo.py              synthetic Sep/Oct demo entries
+    summary.py                deterministic summary calculations (no model involved)
+    db.py · models.py         SQLite persistence + Pydantic data model
+  scripts/                    synthetic fixtures, evaluation, live-model eval
   data/synthetic/             committed synthetic fixtures (diary, aggregates, transcripts)
   frontend/                   Expo mobile app (TypeScript + React Native, SDK 58)
     src/screens/              Home, Capture, History, Insights, Reports, Assistant
-    src/api.ts                typed backend client (EXPO_PUBLIC_API_URL)
-    src/voice.ts              voice recovery driver (bounded retries, background sweep)
-    src/audio.ts              mic PCM stream → 16 kHz mono 16-bit WAV, in-app
-    src/theme.ts              calm warm dark palette (no pure black/white, one amber)
-    src/chat.tsx              assistant transcript + retry-safe request state
-    src/print.ts              one-page B/W print HTML for expo-print
+    src/api.ts · voice.ts     typed backend client · voice recovery driver
+    src/audio.ts · print.ts   mic → 16 kHz mono WAV in-app · one-page print HTML
 ```
+
+The field list follows published headache diaries — The Migraine Trust's and
+Migraine Canada's migraine diaries (see the header comment in
+[schema/fields.yaml](schema/fields.yaml)) — and claims no clinical
+validation. All fields are nullable; "unknown" is always valid. The canonical
+definitions live in `schema/fields.yaml`, enforced by
+`src/quietlog/models.py`.
 
 Key design decisions:
 
-- **Save first, process later.** Capture writes audio + text immediately and
-  shows "Saved"; transcription/extraction run afterward and can be retried.
-  No entry is ever lost to a model or network failure.
-- **Transcription ≠ extraction.** Transcripts are persisted per recording the
-  moment they arrive; extraction failure never costs a retranscription, and
-  repeated processing never duplicates text. Failure kinds are explicit:
-  transient (bounded backoff, auto-retry) vs permanent (invalid audio/auth).
 - **The model copies; code computes.** The model returns time expressions
   verbatim ("since 2pm") and durations as stated; backend code resolves
   datetimes and the verifier checks numbers against quotes. The model never
@@ -235,7 +218,6 @@ Key design decisions:
   result; reused ids with different input are rejected. Recordings carry
   their own stable ids for the same guarantee. Editing fields by hand marks
   them so re-extraction never overwrites user corrections.
-- **SQLite via stdlib `sqlite3`**, no ORM, so setup stays trivial on Mac and Windows.
 
 ## Try it locally — Mac & Windows
 
@@ -358,17 +340,14 @@ block phone-to-computer LAN traffic.
 Copy `.env.example` to `.env` (never commit `.env`). The backend loads
 `.env` automatically on startup; real environment variables win over it:
 
+The four a tester must set (the rest have defaults — see `.env.example`):
+
 | Variable | Purpose |
 |---|---|
-| `QUIETLOG_MODEL_BASE_URL` | Meta Model API base URL |
-| `QUIETLOG_SPARK_MODEL` | Muse Spark model identifier |
-| `QUIETLOG_VOICE_MODEL` | Muse Voice Transcribe identifier |
-| `QUIETLOG_MODEL_API_KEY` | API key |
-| `QUIETLOG_MODEL_TIER` | Keep `standard` (see below) |
-| `QUIETLOG_HOST` / `QUIETLOG_PORT` | Server bind (default `127.0.0.1:8000`) |
-| `QUIETLOG_DB` / `QUIETLOG_AUDIO_DIR` / `QUIETLOG_CACHE_DIR` | Local paths |
-| `QUIETLOG_WEATHER` / `QUIETLOG_WEATHER_TIMEOUT` | Weather snapshots on/off + timeout |
-| `EXPO_PUBLIC_API_URL` | (frontend) API base URL the app talks to |
+| `QUIETLOG_MODEL_API_KEY` | Meta Model API key (backend `.env`) |
+| `QUIETLOG_SPARK_MODEL` | Muse Spark model identifier (backend `.env`) |
+| `QUIETLOG_VOICE_MODEL` | Muse Voice Transcribe identifier (backend `.env`) |
+| `EXPO_PUBLIC_API_URL` | API base URL the app talks to (frontend `.env`) |
 
 **Model tier.** Default to the **standard** (non-contributor) Muse Spark tier.
 The contributor tier lets Meta train on prompts and **must not be used with
@@ -394,41 +373,30 @@ real health information**. Quietlog refuses contributor-named models in code.
 - **Audio format:** WAV container. The engine is native at 24 kHz mono
   16-bit; 16 kHz is accepted. The app converts recordings to WAV in-app so
   neither Mac nor Windows needs ffmpeg.
-- **Tiers:** standard (`muse-spark-1.3`) vs contributor
-  (`muse-spark-1.3-contributor` — Meta trains on contributor prompts and
-  completions). Quietlog refuses contributor models in code; see
-  `.env.example`.
-
-Any model failure leaves the entry saved with status `needs_processing` for
-retry; process failures never lose audio or text.
-
-## Field definitions and sources
-
-The field list follows published headache diaries — The Migraine Trust's and
-Migraine Canada's migraine diaries (see the header comment in
-[schema/fields.yaml](schema/fields.yaml)) — and claims no clinical
-validation. All fields are nullable; "unknown" is always valid. The canonical
-definitions live in `schema/fields.yaml`, enforced by
-`src/quietlog/models.py`.
 
 ## The quote verifier
 
 Every non-null extracted field carries an `evidence_quote` copied from the
-transcript. Deterministic code (`src/quietlog/verifier.py`) normalizes
-case/whitespace/punctuation and requires each quote to be a substring of the
-transcript; `stated_as` values (names, doses, times, triggers) must appear
-inside their own quote; stated numbers must match the quote (digits or
-English number words with a matching unit, e.g. "two hours" → 120 minutes,
-"7 out of 10" → 7); and symptom true/false values must agree with negation
-wording ("no nausea" cannot support `nausea: true`). Failing fields reset to
-unknown and are flagged "not supported by what you said". One targeted
-repair attempt per extraction, then re-verify.
+transcript. Deterministic code (`src/quietlog/verifier.py`) requires each
+quote to appear in the transcript, stated values and numbers to match their
+quote, and symptom true/false values to agree with negation wording ("no
+nausea" cannot support `nausea: true`). Failing fields reset to unknown and
+are flagged "not supported by what you said". One targeted repair attempt
+per extraction, then re-verify.
 
 ## How the summary is computed
 
 `src/quietlog/summary.py:compute_summary` takes stored entries and a window
 (30/60/90 days, chosen by the user) and returns every number on the printed
-page:
+page.
+
+**Why "not logged" is not "no attack".** An attack diary only knows what was
+recorded. Treating silent days as attack-free would undercount attacks and
+mislead the appointment conversation, so unlogged days are reported as
+unknown.
+
+<details>
+<summary>What the summary counts</summary>
 
 - Day counts: days with an attack entry, days with a "no attack" check-in,
   days not logged, unconfirmed entries. A day with both an attack and a
@@ -441,10 +409,7 @@ page:
   (attacks taken for, distinct days, outcome counts); triggers as stated
   with counts and N.
 
-**Why "not logged" is not "no attack".** An attack diary only knows what was
-recorded. Treating silent days as attack-free would undercount attacks and
-mislead the appointment conversation, so unlogged days are reported as
-unknown.
+</details>
 
 ## Evaluation
 
@@ -458,14 +423,9 @@ python scripts/live_agent_eval.py        # bounded live-model multi-turn eval (i
 
 M2 results (`muse-spark-1.3`, 66 transcripts, full table in
 `reports/evaluation.md`): micro accuracy 92.0% (971/1056 field slots);
-hallucination 0/307 before and 0/306 after the verifier (every model quote
-was transcript-supported, so repair never triggered live). Strongest fields:
-duration, pain scale, symptoms, medications (93.9%). Known gaps are
-prompt/scoping follow-ups rather than verifier failures: `ongoing` 28.8%
-(model abstains where labels infer from tense), severity 77.3% (bare
-"mild"/"severe" without a function statement), time expressions 77.3%
-(some "misses" are equivalent longer spans). Verifier rejection 12/12;
-summary matches planted aggregates on the fixtures plus seeds 1, 7, 99.
+hallucination 0/307 before and 0/306 after the verifier; verifier rejection
+12/12; summary matches planted aggregates on the fixtures plus seeds 1, 7,
+99. Per-field breakdowns live in the evaluation report.
 
 The assistant eval (`scripts/live_agent_eval.py`) checks multi-turn tool
 choices and final database state — timer → pain → medication → end,
@@ -506,5 +466,4 @@ not real patients or real speech variety.
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Quietlog records what you tell it; it does not
-give medical advice.
+MIT — see [LICENSE](LICENSE).
