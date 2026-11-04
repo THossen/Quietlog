@@ -22,13 +22,33 @@ import ScreenShell from '../components/ScreenShell';
 import { ErrorText, GhostButton, StatusBadge } from '../components/ui';
 import type { RootStackParamList, TabParamList } from '../nav';
 
+type HistoryFilter = 'all' | 'review' | 'processing' | 'confirmed' | 'checkins';
+
+const FILTERS: Array<{ id: HistoryFilter; label: string }> = [
+  { id: 'all', label: 'All' },
+  { id: 'review', label: 'To review' },
+  { id: 'processing', label: 'Needs processing' },
+  { id: 'confirmed', label: 'Confirmed' },
+  { id: 'checkins', label: 'Check-ins' },
+];
+
+function matchesFilter(entry: Entry, filter: HistoryFilter): boolean {
+  if (filter === 'all') return true;
+  if (filter === 'checkins') return entry.entry_type === 'no_attack';
+  if (filter === 'review') return entry.entry_type === 'attack' && entry.status === 'unconfirmed';
+  if (filter === 'processing') return entry.entry_type === 'attack' && entry.status === 'needs_processing';
+  return entry.status === 'confirmed';
+}
+
 function badgeTone(entry: Entry): 'gold' | 'clay' | 'sage' {
+  if (entry.entry_type === 'no_attack') return 'sage';
   if (entry.status === 'needs_processing') return 'clay';
   if (entry.status === 'in_progress' || entry.status === 'unconfirmed') return 'gold';
   return 'sage';
 }
 
 function badgeLabel(entry: Entry): string {
+  if (entry.entry_type === 'no_attack') return 'Check-in';
   if (entry.status === 'needs_processing') return 'Needs processing';
   if (entry.status === 'in_progress') return 'In progress';
   if (entry.status === 'unconfirmed') return 'To review';
@@ -81,7 +101,7 @@ function ReviewListBody() {
 
   const load = useCallback(async () => {
     try {
-      const body = await listEntries({ entry_type: 'attack', limit: 100 });
+      const body = await listEntries({ limit: 500 });
       setEntries(body.entries);
       loadedOnce.current = true;
       setFailed(false);
@@ -101,6 +121,7 @@ function ReviewListBody() {
   );
 
   const [openMonths, setOpenMonths] = useState<Set<string>>(() => new Set([currentMonthKey()]));
+  const [filter, setFilter] = useState<HistoryFilter>('all');
   const reduceMotion = useReducedMotionSetting();
 
   const toggleMonth = (key: string) => {
@@ -114,17 +135,22 @@ function ReviewListBody() {
     });
   };
 
+  const filtered = useMemo(
+    () => (entries ? entries.filter((entry) => matchesFilter(entry, filter)) : []),
+    [entries, filter],
+  );
+
   const months = useMemo(() => {
     if (!entries) return [];
     const buckets = new Map<string, Entry[]>();
-    for (const entry of entries) {
+    for (const entry of filtered) {
       const key = monthKey(entry.entry_date);
       const bucket = buckets.get(key);
       if (bucket) bucket.push(entry);
       else buckets.set(key, [entry]);
     }
     return [...buckets.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
-  }, [entries]);
+  }, [entries, filtered]);
 
   const retry = async (id: string) => {
     setRetrying(id);
@@ -177,7 +203,7 @@ function ReviewListBody() {
         </View>
         <Text style={styles.summary}>{summarize(entry)}</Text>
       </Pressable>
-      {entry.status === 'needs_processing' && (
+      {entry.entry_type === 'attack' && entry.status === 'needs_processing' && (
         <View style={styles.retryWrap}>
           {entry.transcript || entry.audio_path ? (
             <>
@@ -201,6 +227,30 @@ function ReviewListBody() {
 
   return (
     <View style={styles.column}>
+      <Text style={styles.heading}>History</Text>
+      <View style={styles.chipRow}>
+        {FILTERS.map((item) => {
+          const selected = filter === item.id;
+          const count = entries.filter((entry) => matchesFilter(entry, item.id)).length;
+          return (
+            <Pressable
+              key={item.id}
+              onPress={() => setFilter(item.id)}
+              accessibilityRole="button"
+              accessibilityLabel={`${item.label}, ${count} entries`}
+              accessibilityState={{ selected }}
+              style={[styles.chip, selected ? styles.chipSelected : null]}
+            >
+              <Text style={selected ? styles.chipTextSelected : styles.chipText}>
+                {item.label} ({count})
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      {months.length === 0 ? (
+        <Text style={styles.empty}>Nothing matches this filter.</Text>
+      ) : null}
       {months.map(([key, rows]) => {
         const open = openMonths.has(key);
         const attention = rows.filter(needsAttention).length;
@@ -210,13 +260,13 @@ function ReviewListBody() {
               onPress={() => toggleMonth(key)}
               accessibilityRole="button"
               accessibilityState={{ expanded: open }}
-              accessibilityLabel={`${monthTitle(key)}, ${rows.length} notes${attention > 0 ? `, ${attention} to review` : ''}`}
+              accessibilityLabel={`${monthTitle(key)}, ${rows.length} entries${attention > 0 ? `, ${attention} to review` : ''}`}
               style={styles.monthHeader}
             >
               <View style={styles.monthCopy}>
                 <Text style={styles.monthTitle}>{monthTitle(key)}</Text>
                 <Text style={styles.monthMeta}>
-                  {rows.length} note{rows.length === 1 ? '' : 's'}
+                  {rows.length} entr{rows.length === 1 ? 'y' : 'ies'}
                   {attention > 0 ? (
                     <Text style={styles.monthAttention}> · {attention} to review</Text>
                   ) : null}
@@ -246,6 +296,21 @@ export default function ReviewList() {
 
 const styles = StyleSheet.create({
   column: { flexDirection: 'column', gap: 20, paddingTop: 24 },
+  heading: { color: colors.sand, fontSize: 26, fontFamily: fonts.display },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: {
+    minHeight: 48,
+    borderRadius: sizes.radiusPill,
+    borderWidth: 1,
+    borderColor: colors.edge,
+    backgroundColor: colors.panel,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chipSelected: { borderColor: colors.lightAmber, backgroundColor: colors.lightAmber },
+  chipText: { color: colors.sand, fontSize: 15, fontFamily: fonts.medium },
+  chipTextSelected: { color: colors.ink, fontSize: 15, fontFamily: fonts.semibold },
   loading: { color: colors.dim, fontSize: 20, textAlign: 'center' },
   empty: { color: colors.sand, fontSize: 20, textAlign: 'center' },
   monthHeader: {

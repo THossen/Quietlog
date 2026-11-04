@@ -1,0 +1,31 @@
+{
+  "format": "v0-jsonl",
+  "pid": 38656,
+  "startedAt": 1793768115548,
+  "command": "expo export",
+  "cwd": "C:\\Users\\tanho\\Documents\\Quietlog\\frontend",
+  "maxSegments": 3,
+  "socket": "\\\\.\\pipe\\event-log-38656-mw1n802k-ytjkde-live",
+  "ipcSocket": "\\\\.\\pipe\\event-log-38656-mw1n802k-ytjkde-ipc",
+  "origin": {
+    "argv": [
+      "C:\\Users\\tanho\\Documents\\Quietlog\\frontend\\node_modules\\expo\\bin\\cli",
+      "export",
+      "--platform",
+      "ios",
+      "--output-dir",
+      "dist-export-tmp"
+    ],
+    "execPath": "C:\\Program Files\\nodejs\\node.exe",
+    "cwd": "C:\\Users\\tanho\\Documents\\Quietlog\\frontend",
+    "ppid": 30836,
+    "env": {
+      "npmLifecycleEvent": "npx",
+      "npmExecPath": "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+      "npmPackageName": "quietlog"
+    }
+  },
+  "metadata": {
+    "version": "58.1.18"
+  }
+}

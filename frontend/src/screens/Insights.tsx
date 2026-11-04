@@ -1,12 +1,12 @@
 import { useCallback, useRef, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import type { AskResponse, Summary as SummaryData } from '../api';
-import { askDiary, getSummary } from '../api';
+import type { Summary as SummaryData } from '../api';
+import { getSummary } from '../api';
 import { formatDuration, symptomLabel } from '../print';
 import { colors, fonts, shadows, sizes } from '../theme';
 import ScreenShell from '../components/ScreenShell';
-import { ErrorText, GhostButton, PrimaryButton } from '../components/ui';
+import { ErrorText, GhostButton } from '../components/ui';
 
 /** Attacks in trailing windows, derived from one 90-day summary. */
 function countAttackDays(calendar: SummaryData['calendar'], fromEnd: number, days: number): number {
@@ -25,10 +25,6 @@ function weekLabel(startIso: string, endIso: string): string {
 function InsightsBody() {
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [failed, setFailed] = useState(false);
-  const [question, setQuestion] = useState('');
-  const [asking, setAsking] = useState(false);
-  const [answer, setAnswer] = useState<AskResponse | null>(null);
-  const [askError, setAskError] = useState<string | null>(null);
   const loadedOnce = useRef(false);
 
   const load = useCallback(async () => {
@@ -112,21 +108,6 @@ function InsightsBody() {
     return { name: med.display_name, helped, taken: med.attack_entries };
   });
 
-  const ask = async () => {
-    const text = question.trim();
-    if (!text || asking) return;
-    setAsking(true);
-    setAskError(null);
-    try {
-      setAnswer(await askDiary(text));
-    } catch (err) {
-      setAnswer(null);
-      setAskError(err instanceof Error ? err.message : 'Could not answer. Try again.');
-    } finally {
-      setAsking(false);
-    }
-  };
-
   return (
     <View style={styles.column}>
       <Text style={styles.heading}>Insights</Text>
@@ -134,31 +115,6 @@ function InsightsBody() {
         Patterns in your entries over the last 90 days. Associations, not causes — and never
         medical advice.
       </Text>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Ask your diary</Text>
-        <TextInput
-          value={question}
-          onChangeText={setQuestion}
-          placeholder="How many migraines did I have last month?"
-          placeholderTextColor={colors.dim}
-          style={styles.askInput}
-          maxLength={500}
-          returnKeyType="send"
-          onSubmitEditing={ask}
-        />
-        <PrimaryButton title={asking ? 'Asking…' : 'Ask'} onPress={ask} disabled={asking} />
-        {answer ? (
-          <View style={styles.answerBox}>
-            <Text style={styles.body}>{answer.answer}</Text>
-            <Text style={styles.dim}>
-              From {answer.entries_consulted} {answer.entries_consulted === 1 ? 'entry' : 'entries'} ·
-              diary lookup, not medical advice.
-            </Text>
-          </View>
-        ) : null}
-        {askError ? <ErrorText>{askError}</ErrorText> : null}
-      </View>
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Attack days</Text>
@@ -282,17 +238,6 @@ const styles = StyleSheet.create({
     ...shadows.card,
   },
   cardTitle: { color: colors.sand, fontSize: 20, fontFamily: fonts.semibold },
-  askInput: {
-    minHeight: sizes.touch,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.edge,
-    backgroundColor: colors.panelSoft,
-    color: colors.sand,
-    fontSize: sizes.body,
-    paddingHorizontal: 14,
-  },
-  answerBox: { flexDirection: 'column', gap: 8 },
   big: { color: colors.sand, fontSize: 46, fontFamily: fonts.display, lineHeight: 54 },
   body: { color: colors.sand, fontSize: sizes.body, lineHeight: 27 },
   dim: { color: colors.dim, fontSize: 16 },

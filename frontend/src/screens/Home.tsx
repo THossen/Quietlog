@@ -512,6 +512,7 @@ function HomeBody() {
       : `Average pain ${formatAvg(monthData.painAvg)} across ${monthData.painN} score${monthData.painN === 1 ? '' : 's'} in ${label}`;
   const blanks = (new Date(month.y, month.m, 1).getDay() + 6) % 7;
   const mm = String(month.m + 1).padStart(2, '0');
+  const todayDay = isCurrent ? new Date().getDate() : null;
 
   const renderRecent = (entry: Entry) => {
     const kind = entryKind(entry);
@@ -580,6 +581,19 @@ function HomeBody() {
           <ChevronRight size={24} color={isCurrent ? colors.edge : colors.sand} />
         </ScalePressable>
       </View>
+      {!isCurrent ? (
+        <ScalePressable
+          onPress={() => {
+            tick();
+            setMonth(today);
+          }}
+          accessibilityRole="button"
+          accessibilityLabel={`Back to ${monthLabel(today)}`}
+          style={styles.todayJump}
+        >
+          <Text style={styles.todayJumpText}>Back to {monthLabel(today)}</Text>
+        </ScalePressable>
+      ) : null}
 
       <View style={styles.metrics}>
         <View
@@ -761,6 +775,7 @@ function HomeBody() {
           const isAttack = monthData?.attackDates.has(dateStr) === true;
           const isClear = !isAttack && monthData?.checkinDates.has(dateStr) === true;
           const logged = isAttack || isClear;
+          const isToday = todayDay === day;
           const content = (
             <>
               <Text style={logged ? styles.calDay : styles.calDayDim}>{day}</Text>
@@ -777,17 +792,17 @@ function HomeBody() {
               key={dateStr}
               onPress={() => openDay(dateStr)}
               accessibilityRole="button"
-              accessibilityLabel={`${formatDay(dateStr)}: ${isAttack ? 'attack day' : 'no-headache day'}. Open records.`}
-              style={styles.calCell}
+              accessibilityLabel={`${formatDay(dateStr)}${isToday ? ' (today)' : ''}: ${isAttack ? 'attack day' : 'no-headache day'}. Open records.`}
+              style={[styles.calCell, isToday ? styles.calToday : null]}
             >
               {content}
             </ScalePressable>
           ) : (
             <View
               key={dateStr}
-              style={styles.calCell}
+              style={[styles.calCell, isToday ? styles.calToday : null]}
               accessible
-              accessibilityLabel={`${formatDay(dateStr)}: not logged`}
+              accessibilityLabel={`${formatDay(dateStr)}${isToday ? ' (today)' : ''}: not logged`}
             >
               {content}
             </View>
@@ -805,17 +820,14 @@ function HomeBody() {
         </View>
       </View>
 
-      <View style={styles.statusRow} accessible accessibilityLabel={statusLabel(online, apiBase)}>
-        <View
-          style={[
-            styles.dot,
-            online === true ? styles.dotOk : online === false ? styles.dotFail : styles.dotUnknown,
-          ]}
-        />
-        <Text style={styles.statusText} numberOfLines={1}>
-          {online === null ? 'Checking server…' : online ? `Connected · ${apiBase}` : `No server at ${apiBase}`}
-        </Text>
-      </View>
+      {online === false ? (
+        <View style={styles.statusRow} accessible accessibilityLabel={statusLabel(online, apiBase)}>
+          <View style={[styles.dot, styles.dotFail]} />
+          <Text style={styles.statusText} numberOfLines={2}>
+            {`No server at ${apiBase}. Entries you log may not save until it is back.`}
+          </Text>
+        </View>
+      ) : null}
       {waiting !== null && waiting > 0 && (
         <Text style={styles.waiting}>
           {waiting} {waiting === 1 ? 'note is' : 'notes are'} still waiting to be understood.
@@ -839,6 +851,17 @@ const styles = StyleSheet.create({
   monthHead: { flex: 1, alignItems: 'center' },
   monthTitle: { color: colors.sand, fontSize: 24, fontFamily: fonts.display },
   monthSub: { color: colors.dim, fontSize: 15 },
+  todayJump: {
+    alignSelf: 'center',
+    minHeight: 44,
+    borderRadius: sizes.radiusPill,
+    borderWidth: 1,
+    borderColor: colors.lightAmber,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  todayJumpText: { color: colors.lightAmber, fontSize: 15, fontFamily: fonts.medium },
   chev: {
     width: 56,
     height: 56,
@@ -935,6 +958,7 @@ const styles = StyleSheet.create({
     gap: 3,
     paddingVertical: 4,
   },
+  calToday: { borderWidth: 1, borderColor: colors.lightAmber, borderRadius: 10 },
   calHead: { color: colors.dim, fontSize: 12, fontFamily: fonts.medium },
   calDay: { color: colors.sand, fontSize: 15, fontFamily: fonts.medium },
   calDayDim: { color: colors.dim, fontSize: 15, opacity: 0.55 },

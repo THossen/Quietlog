@@ -123,6 +123,14 @@ function SummaryBody() {
         })}
       </View>
 
+      <PrimaryButton
+        title={busy ? 'Making PDF…' : 'Save / share PDF'}
+        onPress={savePdf}
+        disabled={busy || !summary}
+      />
+      {shared ? <Text style={styles.shared}>{shared}</Text> : null}
+      {error ? <ErrorText>{error}</ErrorText> : null}
+
       {failed ? (
         <>
           <ErrorText>Could not load the summary. Is the server running?</ErrorText>
@@ -256,6 +264,24 @@ function SummaryBody() {
           <Text style={styles.footer}>
             Counts come from entries the user recorded. Days not logged are unknown, not attack-free.
           </Text>
+
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Before you share</Text>
+            <Text style={styles.body}>
+              {windowDays}-day window · {formatRange(summary.window_start, summary.window_end)}
+            </Text>
+            <Text style={styles.dim}>
+              {summary.attack_entries} attack {summary.attack_entries === 1 ? 'entry' : 'entries'} ·{' '}
+              {summary.unconfirmed_entries > 0
+                ? `${summary.unconfirmed_entries} unconfirmed (marked * in the PDF)`
+                : 'all confirmed'}
+            </Text>
+            <Text style={styles.dim}>
+              {narrative
+                ? 'AI-drafted paragraph included — review it above before sharing.'
+                : 'No AI-drafted paragraph included.'}
+            </Text>
+          </View>
 
           <PrimaryButton
             title={busy ? 'Making PDF…' : 'Save / share PDF'}
