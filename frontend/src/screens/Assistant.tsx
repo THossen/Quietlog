@@ -989,6 +989,7 @@ export default function Assistant() {
               </>
             }
           />
+          <View style={styles.frameBottom}>
           {busy ? <Text accessibilityLiveRegion="polite" style={styles.thinking}>{quickStatus ?? pdfStatus ?? PROGRESS_STAGES[progressIdx]}</Text> : null}
           {transcribing ? <Text style={styles.thinking}>Transcribing…</Text> : null}
           {error ? <ErrorText>{error}</ErrorText> : null}
@@ -1051,6 +1052,7 @@ export default function Assistant() {
             </ScalePressable>
           </View>
           <Text style={styles.disclaimer}>Diary help, never medical advice.</Text>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -1110,8 +1112,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  frame: { flex: 1, paddingHorizontal: 20, paddingBottom: 12 },
-  list: { flexGrow: 1, paddingTop: 8, paddingBottom: 20, gap: 20 },
+  frame: { flex: 1, paddingBottom: 12 },
+  list: { flexGrow: 1, paddingTop: 8, paddingBottom: 20, paddingHorizontal: 20, gap: 20 },
+  frameBottom: { paddingHorizontal: 20 },
   empty: { marginTop: 28, flexDirection: 'column', gap: 12 },
   hint: { color: colors.dim, fontSize: 16, lineHeight: 24, maxWidth: 460 },
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

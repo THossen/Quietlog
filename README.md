@@ -1,8 +1,8 @@
 # Quietlog
 
-An **agentic migraine diary**: tap **Log a headache**, speak for ten seconds — or just
+An **agentic migraine journal**: tap **Log a headache**, speak for ten seconds — or just
 tell the assistant — and get a **one-page printable summary** for your next
-appointment. Quietlog's agent keeps the diary for you; you only confirm it.
+appointment. Quietlog's agent keeps the journal for you; you only confirm it.
 
 ## Built with
 
@@ -11,7 +11,7 @@ appointment. Quietlog's agent keeps the diary for you; you only confirm it.
 | Agent + extraction | Muse Spark 1.3 | Bounded tool loop, structured fields |
 | Voice | Muse Voice Transcribe 1.0 | Voice-note transcription |
 | Backend | Python 3.11 · FastAPI · Pydantic 2 | Save-first API, validated tools |
-| Storage | SQLite (Python stdlib) | Local-only diary, no ORM |
+| Storage | SQLite (Python stdlib) | Local-only journal, no ORM |
 | Mobile | Expo SDK 58 · React Native · TypeScript | Expo Go app, no dev build |
 | Native features | expo-audio · expo-location · expo-print/sharing | Mic, weather point, PDF |
 | Weather | Open-Meteo | Keyless log-time snapshots |
