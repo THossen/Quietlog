@@ -1,6 +1,6 @@
 # Quietlog
 
-An **agentic migraine diary**: tap **Log attack**, speak for ten seconds — or just
+An **agentic migraine diary**: tap **Log a headache**, speak for ten seconds — or just
 tell the assistant — and get a **one-page printable summary** for your next
 appointment. Quietlog's agent keeps the diary for you; you only confirm it.
 
@@ -183,7 +183,7 @@ Quietlog/
   scripts/                    synthetic fixtures, evaluation, live-model eval
   data/synthetic/             committed synthetic fixtures (diary, aggregates, transcripts)
   frontend/                   Expo mobile app (TypeScript + React Native, SDK 58)
-    src/screens/              Home, Capture, History, Insights, Reports, Assistant
+    src/screens/              Home · Capture · ReviewList (History) · Insights · Summary (Reports) · Assistant
     src/api.ts · voice.ts     typed backend client · voice recovery driver
     src/audio.ts · print.ts   mic → 16 kHz mono WAV in-app · one-page print HTML
 ```
@@ -340,14 +340,14 @@ block phone-to-computer LAN traffic.
 Copy `.env.example` to `.env` (never commit `.env`). The backend loads
 `.env` automatically on startup; real environment variables win over it:
 
-The four a tester must set (the rest have defaults — see `.env.example`):
+Only the API key and the frontend URL need setting; the model IDs ship with the defaults below (the rest have defaults too — see `.env.example`):
 
 | Variable | Purpose |
 |---|---|
-| `QUIETLOG_MODEL_API_KEY` | Meta Model API key (backend `.env`) |
-| `QUIETLOG_SPARK_MODEL` | Muse Spark model identifier (backend `.env`) |
-| `QUIETLOG_VOICE_MODEL` | Muse Voice Transcribe identifier (backend `.env`) |
-| `EXPO_PUBLIC_API_URL` | API base URL the app talks to (frontend `.env`) |
+| `QUIETLOG_MODEL_API_KEY` | Meta Model API key — required (backend `.env`) |
+| `QUIETLOG_SPARK_MODEL` | Muse Spark model identifier (default `muse-spark-1.3`) |
+| `QUIETLOG_VOICE_MODEL` | Muse Voice Transcribe identifier (default `muse-voice-transcribe-1.0`) |
+| `EXPO_PUBLIC_API_URL` | API base URL the app talks to — required for devices (frontend `.env`) |
 
 **Model tier.** Default to the **standard** (non-contributor) Muse Spark tier.
 The contributor tier lets Meta train on prompts and **must not be used with
@@ -438,7 +438,10 @@ not real patients or real speech variety.
 
 ## Privacy
 
-- All user data stays local (SQLite + audio files on the user's machine).
+- Diary data is stored locally (SQLite + audio files on the user's machine).
+  To transcribe and organize notes, the necessary audio/text is sent to
+  Meta's Model API; weather lookups send coordinates to Open-Meteo for a
+  single call and never store them.
 - The repository contains **only synthetic data** (`data/synthetic/`). Real
   diary entries, audio, `.env`, and local databases are gitignored and
   never committed.
