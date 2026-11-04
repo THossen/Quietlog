@@ -4,6 +4,38 @@ An **agentic migraine diary**: tap **Log attack**, speak for ten seconds — or 
 tell the assistant — and get a **one-page printable summary** for your next
 appointment. Quietlog's agent keeps the diary for you; you only confirm it.
 
+## Built with
+
+| Layer | Choice | Used for |
+|---|---|---|
+| Agent + extraction | Muse Spark 1.3 | Bounded tool loop, structured fields |
+| Voice | Muse Voice Transcribe 1.0 | Voice-note transcription |
+| Backend | Python 3.11 · FastAPI · Pydantic 2 | Save-first API, validated tools |
+| Storage | SQLite (Python stdlib) | Local-only diary, no ORM |
+| Mobile | Expo SDK 58 · React Native · TypeScript | Expo Go app, no dev build |
+| Native features | expo-audio · expo-location · expo-print/sharing | Mic, weather point, PDF |
+| Weather | Open-Meteo | Keyless log-time snapshots |
+| Quality | pytest · multi-turn live-model eval | Synthetic-only verification |
+
+## Contents
+
+- [Quick start](#quick-start) · [Meet the agent](#meet-the-agent) · [Features](#features) · [Try it locally](#try-it-locally--mac--windows)
+- [Architecture](#architecture) · [Meta Model API integration](#meta-model-api-integration) · [Evaluation](#evaluation)
+- [Privacy](#privacy) · [Limitations](#limitations) · [License](#license)
+
+## Quick start
+
+Two terminals — backend, then app. Full Mac & Windows walkthrough with
+simulator, emulator, and real-phone options: [Try it locally](#try-it-locally--mac--windows).
+
+1. **Backend:** create `.venv`, `pip install -e ".[dev]"`, copy
+   `.env.example` to `.env` and set `QUIETLOG_MODEL_API_KEY`, then
+   `uvicorn quietlog.main:app --host 0.0.0.0 --port 8000` (use
+   `127.0.0.1` instead for simulator-only testing).
+2. **App:** `cd frontend`, `npm install`, copy `.env.example` to `.env`
+   and set `EXPO_PUBLIC_API_URL` for your testing target, then
+   `npx expo start -c` and scan the QR code with Expo Go.
+
 **The problem.** Doctors ask people with migraines to keep a diary, but the worst
 moment to write one is during an attack — exactly when the data is most valuable.
 People reconstruct it from memory days later, or not at all.
@@ -56,6 +88,28 @@ The agent's tools are validated server-side with strict argument schemas, and
 its boundaries are enforced in code, not just prompting: no diagnoses, no
 treatment advice, no invented details, and confirmed history it cannot touch.
 
+**How a note flows:** speak or type → saved instantly → transcribed →
+extracted into fields → every field checked against your words by the quote
+verifier → shown for your review → counted into the summary/PDF. Weather is
+snapped at log time; nothing in that chain can lose what you saved.
+
+### What the agent can do
+
+Fourteen validated tools, dispatched from what you say:
+
+| You say | Tool(s) | Result |
+|---|---|---|
+| "Bad one since lunch, took Excedrin" | `log_attack` | Note saved + fields extracted |
+| "No headache today" | `log_checkin` | No-headache day recorded |
+| "Also, I took ibuprofen at noon" | `add_note` | Appended to the same attack |
+| "Start a timer" / "It's over" | `timer_start` / `timer_end` / `timer_status` | Attack timed live |
+| "Pain was 7 out of 10" (follow-up) | `answer_followups` | Answer folded into the entry |
+| "How many attacks this month?" | `answer_diary` / `get_summary` | Answered from your records |
+| "Draft my appointment summary" | `draft_narrative` | Paragraph from computed numbers |
+| "Save that as a PDF" | `save_pdf` | One-page PDF + share sheet |
+| "Find last Tuesday's headache" | `find_entries` / `get_entry` | Matching entry shown |
+| "Actually, that was yesterday" | `set_entry_date` | Whole attack moved to that day |
+
 ## Features
 
 - **Capture your way.** Voice notes (automatic transcription, transcripts persist
@@ -85,6 +139,9 @@ hackathon; no third-party code was copied. The agentic assistant — bounded too
 loop, idempotent turns, honest receipts — was designed and hardened against a
 multi-turn evaluation suite, not bolted on.
 
+<details>
+<summary>Milestone history (M1–M4 + post-M4 hardening)</summary>
+
 - **M1 (complete):** data model, `schema/fields.yaml`, synthetic diary generator
   with planted aggregates, deterministic summary calculations, unit tests.
 - **M2 (complete):** transcription + extraction services with response cache,
@@ -108,6 +165,8 @@ multi-turn evaluation suite, not bolted on.
 Current verification: **265 `pytest` passing**, TypeScript (`tsc --noEmit`)
 clean, iOS bundle (`expo export`) clean. On-device verification of the newest
 flows is ongoing.
+
+</details>
 
 ## Architecture
 
@@ -176,35 +235,123 @@ Key design decisions:
   result; reused ids with different input are rejected. Recordings carry
   their own stable ids for the same guarantee. Editing fields by hand marks
   them so re-extraction never overwrites user corrections.
-- **SQLite via stdlib `sqlite3`**, no ORM, so Windows setup stays trivial.
+- **SQLite via stdlib `sqlite3`**, no ORM, so setup stays trivial on Mac and Windows.
 
-## Setup (Windows PowerShell)
+## Try it locally — Mac & Windows
+
+Quietlog runs the same way on both platforms: a Python/FastAPI backend on
+your computer plus the Expo app in Expo Go (real phone) or a simulator/
+emulator. The only differences are the virtualenv activation path and how
+you find your LAN IP — both are covered below. No build step and no
+ffmpeg is needed on either platform.
+
+**Prerequisites (both platforms):**
+
+- Python **3.11+** — Windows: `python --version`; Mac: `python3 --version`
+  (if `python3` is missing, install from python.org or `brew install python@3.11`)
+- Node.js **20 LTS or newer** with npm — `node --version`
+- [Expo Go](https://expo.dev/go) on your phone (iOS or Android), on the
+  **same Wi-Fi** as the computer for real-device testing
+
+### 1. Backend
+
+From the repository root, in a first terminal:
+
+**Windows (PowerShell):**
 
 ```powershell
-# From the repository root
 python -m venv .venv
 .venv\Scripts\Activate.ps1
-pip install -e ".[dev]"
-
-# Generate the synthetic fixtures
-python scripts\make_synthetic_diary.py
-
-# Run the test suite
+# If activation is blocked: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+python -m pip install -e ".[dev]"
+Copy-Item .env.example .env   # then edit .env and set QUIETLOG_MODEL_API_KEY
+python scripts/make_synthetic_diary.py
 python -m pytest
+```
 
-# Start the API. Loopback for simulators:
+**Mac (Terminal, zsh/bash):**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
+cp .env.example .env          # then edit .env and set QUIETLOG_MODEL_API_KEY
+python scripts/make_synthetic_diary.py
+python -m pytest
+```
+
+Then start the API (same command on both platforms, venv activated):
+
+```bash
+# Simulator/emulator on the same computer:
 uvicorn quietlog.main:app --host 127.0.0.1 --port 8000
-# ...or your LAN IP for a real phone (the phone is not 127.0.0.1 to itself):
+# Real phone via Expo Go (phone reaches the computer over Wi-Fi):
 uvicorn quietlog.main:app --host 0.0.0.0 --port 8000
+```
 
-# In a second shell, start the app
+Sanity-check it before opening the app: <http://127.0.0.1:8000/health>
+should return `{"status":"ok"}` (interactive docs at `/docs`).
+
+### 2. Frontend
+
+In a **second** terminal (no venv needed):
+
+**Windows (PowerShell):**
+
+```powershell
 cd frontend
 npm install
-# Point the app at the API (copy .env.example to .env first on a real
-# device, with your PC's LAN IP, e.g. http://192.168.1.20:8000)
-npx expo start
-# Scan the QR code with Expo Go on your phone.
+Copy-Item .env.example .env   # then set EXPO_PUBLIC_API_URL as below
+npx expo start -c
 ```
+
+**Mac (Terminal):**
+
+```bash
+cd frontend
+npm install
+cp .env.example .env          # then set EXPO_PUBLIC_API_URL as below
+npx expo start -c
+```
+
+`-c` clears the Metro cache — required after changing `.env`, because
+`EXPO_PUBLIC_*` values are inlined when the bundle is built.
+
+### 3. Point the app at your backend
+
+Edit `frontend/.env`. Pick the row for how you are testing:
+
+| Testing on | `EXPO_PUBLIC_API_URL` | Backend `--host` |
+|---|---|---|
+| iOS Simulator (Mac only) | `http://127.0.0.1:8000` | `127.0.0.1` |
+| Android Emulator (Mac & Windows) | `http://10.0.2.2:8000` | `127.0.0.1` |
+| Real phone, Expo Go (Mac & Windows) | `http://<your-LAN-IP>:8000` | `0.0.0.0` |
+
+A real phone is never `127.0.0.1` to itself — use the computer's LAN
+address, e.g. `http://192.168.1.20:8000`. Find it with:
+
+- **Windows:** run `ipconfig` and use the **IPv4 Address** under your Wi-Fi adapter.
+- **Mac:** run `ipconfig getifaddr en0` (Wi-Fi), or check System Settings → Wi-Fi → Details.
+
+Then restart Expo (`Ctrl+C`, then `npx expo start -c`) so the new URL is picked up.
+
+### 4. Open the app
+
+- **Real phone:** scan the QR code printed by `npx expo start` with Expo Go
+  (Android) or the Camera app (iOS). Keep phone and computer on the same Wi-Fi.
+- **iOS Simulator (Mac only):** press `i` in the Expo terminal.
+- **Android Emulator (Mac & Windows):** press `a` in the Expo terminal
+  (emulator must already be running).
+- **No phone handy:** press `w` for web — useful as a smoke check only;
+  mic, location, and print/share behave differently than on device.
+
+**Connection troubleshooting ("Cannot reach Quietlog"):** confirm
+`http://127.0.0.1:8000/health` loads on the computer; confirm
+`EXPO_PUBLIC_API_URL` matches the table above and Expo was restarted with
+`-c`; on Windows allow Python/Node through Windows Defender Firewall on
+**Private** networks, on Mac check System Settings → Network → Firewall
+for Python/Node; and disable VPNs or router AP/client isolation, which
+block phone-to-computer LAN traffic.
 
 ## Environment variables
 
@@ -246,7 +393,7 @@ real health information**. Quietlog refuses contributor-named models in code.
   part). Limits: 32 MB body, 10 minutes of audio.
 - **Audio format:** WAV container. The engine is native at 24 kHz mono
   16-bit; 16 kHz is accepted. The app converts recordings to WAV in-app so
-  Windows needs no ffmpeg.
+  neither Mac nor Windows needs ffmpeg.
 - **Tiers:** standard (`muse-spark-1.3`) vs contributor
   (`muse-spark-1.3-contributor` — Meta trains on contributor prompts and
   completions). Quietlog refuses contributor models in code; see
@@ -301,11 +448,12 @@ unknown.
 
 ## Evaluation
 
-```powershell
-python scripts\make_synthetic_diary.py   # regenerate fixtures (fixed seeds)
-python scripts\evaluate.py               # writes reports/evaluation.md
-python scripts\live_agent_eval.py --stub # assistant eval harness self-test (no network)
-python scripts\live_agent_eval.py        # bounded live-model multi-turn eval (isolated DBs, never production)
+```bash
+# Same commands on Mac and Windows (venv activated; forward slashes work in PowerShell too)
+python scripts/make_synthetic_diary.py   # regenerate fixtures (fixed seeds)
+python scripts/evaluate.py               # writes reports/evaluation.md
+python scripts/live_agent_eval.py --stub # assistant eval harness self-test (no network)
+python scripts/live_agent_eval.py        # bounded live-model multi-turn eval (isolated DBs, never production)
 ```
 
 M2 results (`muse-spark-1.3`, 66 transcripts, full table in
@@ -355,3 +503,8 @@ not real patients or real speech variety.
   notes.
 - Background recovery assumes a single backend worker; simultaneous
   multi-process writes to the same entry are serialized best-effort.
+
+## License
+
+MIT — see [LICENSE](LICENSE). Quietlog records what you tell it; it does not
+give medical advice.
