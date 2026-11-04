@@ -1,11 +1,11 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import type { Summary as SummaryData } from '../api';
 import { getSummary } from '../api';
 import { formatDuration, symptomLabel } from '../print';
 import { colors, fonts, shadows, sizes } from '../theme';
-import ScreenShell from '../components/ScreenShell';
+import ScreenShell, { usePullRefresh } from '../components/ScreenShell';
 import { ErrorText, GhostButton } from '../components/ui';
 
 /** Attacks in trailing windows, derived from one 90-day summary. */
@@ -22,7 +22,7 @@ function weekLabel(startIso: string, endIso: string): string {
   return `${short(startIso)}–${short(endIso)}`;
 }
 
-function InsightsBody() {
+function InsightsBody({ registerRefresh }: { registerRefresh: (fn: () => Promise<void>) => void }) {
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [failed, setFailed] = useState(false);
   const loadedOnce = useRef(false);
@@ -46,6 +46,10 @@ function InsightsBody() {
       load();
     }, [load]),
   );
+
+  useEffect(() => {
+    registerRefresh(load);
+  }, [registerRefresh, load]);
 
   if (failed) {
     return (
@@ -213,9 +217,10 @@ function pressureLine(weather?: SummaryData['weather']): string {
 }
 
 export default function Insights() {
+  const { refreshing, onRefresh, registerRefresh } = usePullRefresh();
   return (
-    <ScreenShell>
-      <InsightsBody />
+    <ScreenShell refreshing={refreshing} onRefresh={onRefresh}>
+      <InsightsBody registerRefresh={registerRefresh} />
     </ScreenShell>
   );
 }

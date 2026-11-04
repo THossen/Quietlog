@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   LayoutAnimation,
   Platform,
@@ -18,7 +18,7 @@ import { tick } from '../haptics';
 import { getLogCoords } from '../location';
 import { useReducedMotionSetting } from '../motion';
 import { colors, fonts, shadows, sizes } from '../theme';
-import ScreenShell from '../components/ScreenShell';
+import ScreenShell, { usePullRefresh } from '../components/ScreenShell';
 import { ErrorText, FilterChip, GhostButton, StatusBadge } from '../components/ui';
 import type { RootStackParamList, TabParamList } from '../nav';
 
@@ -83,7 +83,7 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-function ReviewListBody() {
+function ReviewListBody({ registerRefresh }: { registerRefresh: (fn: () => Promise<void>) => void }) {
   const navigation =
     useNavigation<
       CompositeNavigationProp<
@@ -119,6 +119,10 @@ function ReviewListBody() {
       load();
     }, [load]),
   );
+
+  useEffect(() => {
+    registerRefresh(load);
+  }, [registerRefresh, load]);
 
   const [openMonths, setOpenMonths] = useState<Set<string>>(() => new Set([currentMonthKey()]));
   const [filter, setFilter] = useState<HistoryFilter>('all');
@@ -284,9 +288,10 @@ function ReviewListBody() {
 }
 
 export default function ReviewList() {
+  const { refreshing, onRefresh, registerRefresh } = usePullRefresh();
   return (
-    <ScreenShell>
-      <ReviewListBody />
+    <ScreenShell refreshing={refreshing} onRefresh={onRefresh}>
+      <ReviewListBody registerRefresh={registerRefresh} />
     </ScreenShell>
   );
 }

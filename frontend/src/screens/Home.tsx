@@ -22,7 +22,7 @@ import { useChat } from '../chat';
 import { useReducedMotionSetting } from '../motion';
 import { sweepPendingVoice } from '../voice';
 import { colors, fonts, shadows, sizes } from '../theme';
-import ScreenShell from '../components/ScreenShell';
+import ScreenShell, { usePullRefresh } from '../components/ScreenShell';
 import { ErrorText, GhostButton, PrimaryButton, ScalePressable, StatusBadge } from '../components/ui';
 import type { RootStackParamList, TabParamList } from '../nav';
 
@@ -204,7 +204,7 @@ function LiveDot() {
   return <Animated.View style={[styles.liveDot, { opacity }]} />;
 }
 
-function HomeBody() {
+function HomeBody({ registerRefresh }: { registerRefresh: (fn: () => Promise<void>) => void }) {
   const navigation =
     useNavigation<
       CompositeNavigationProp<
@@ -246,37 +246,31 @@ function HomeBody() {
   const reduceMotion = useReducedMotionSetting();
 
   const statusLoaded = useRef(false);
-  useFocusEffect(
-    useCallback(() => {
-      let cancelled = false;
-      const first = !statusLoaded.current;
-      getHealth().then((ok) => {
-        if (!cancelled) setOnline(ok);
-      });
-      Promise.all([
+  const loadStatus = useCallback(async () => {
+    const first = !statusLoaded.current;
+    setOnline(await getHealth());
+    try {
+      const [pending, running] = await Promise.all([
         listEntries({ status: 'needs_processing', limit: 100 }),
         listEntries({ status: 'in_progress', entry_type: 'attack', limit: 1 }),
-      ])
-        .then(([pending, running]) => {
-          if (!cancelled) {
-            setWaiting(pending.count);
-            setActive(running.entries[0] ?? null);
-            statusLoaded.current = true;
-          }
-        })
-        .catch(() => {
-          if (!cancelled && first) {
-            setWaiting(null);
-            setActive(null);
-          }
-        });
+      ]);
+      setWaiting(pending.count);
+      setActive(running.entries[0] ?? null);
+      statusLoaded.current = true;
+    } catch {
+      if (first) {
+        setWaiting(null);
+        setActive(null);
+      }
+    }
+  }, [reloadKey]);
+  useFocusEffect(
+    useCallback(() => {
+      void loadStatus();
       // Background voice recovery on every visit: picks up interrupted
       // captures and restarted-backend residue. Quiet by design.
       void sweepPendingVoice();
-      return () => {
-        cancelled = true;
-      };
-    }, [reloadKey]),
+    }, [loadStatus]),
   );
 
   // Same recovery when the app returns from the background (no focus change).
@@ -295,72 +289,73 @@ function HomeBody() {
   );
 
   const loadedMonth = useRef<string | null>(null);
-  useFocusEffect(
-    useCallback(() => {
-      let cancelled = false;
-      const key = `${month.y}-${month.m}`;
-      const first = loadedMonth.current !== key;
+  const loadMonth = useCallback(async () => {
+    const key = `${month.y}-${month.m}`;
+    const first = loadedMonth.current !== key;
+    if (first) {
+      setMonthEntries(null);
+      setMonthFailed(false);
+      setMonthError(null);
+    }
+    const { start, end } = monthBounds(month);
+    try {
+      const body = await listEntries({ start, end, limit: 500 });
+      setMonthEntries(body.entries);
+      setMonthFailed(false);
+      setMonthError(null);
+      loadedMonth.current = key;
+    } catch (err) {
       if (first) {
         setMonthEntries(null);
-        setMonthFailed(false);
-        setMonthError(null);
+        setMonthFailed(true);
+        setMonthError(err instanceof Error ? err.message : 'Unknown error.');
       }
-      const { start, end } = monthBounds(month);
-      listEntries({ start, end, limit: 500 }).then(
-        (body) => {
-          if (!cancelled) {
-            setMonthEntries(body.entries);
-            setMonthFailed(false);
-            setMonthError(null);
-            loadedMonth.current = key;
-          }
-        },
-        (err: unknown) => {
-          if (!cancelled && first) {
-            setMonthEntries(null);
-            setMonthFailed(true);
-            setMonthError(err instanceof Error ? err.message : 'Unknown error.');
-          }
-        },
-      );
-      return () => {
-        cancelled = true;
-      };
-    }, [month, reloadKey]),
+    }
+  }, [month, reloadKey]);
+  useFocusEffect(
+    useCallback(() => {
+      void loadMonth();
+    }, [loadMonth]),
   );
 
   const recentLoaded = useRef(false);
+  const loadRecent = useCallback(async () => {
+    const first = !recentLoaded.current;
+    if (first) {
+      setRecent(null);
+      setRecentFailed(false);
+      setRecentError(null);
+    }
+    try {
+      const [latest, review] = await Promise.all([
+        listEntries({ limit: 3 }),
+        listEntries({ status: 'unconfirmed', limit: 100 }),
+      ]);
+      setRecent(latest.entries);
+      setRecentFailed(false);
+      setRecentError(null);
+      setToReview(review.count);
+      recentLoaded.current = true;
+    } catch (err) {
+      if (!first) return;
+      setRecent(null);
+      setRecentFailed(true);
+      setRecentError(err instanceof Error ? err.message : 'Unknown error.');
+      setToReview(null);
+    }
+  }, [reloadKey]);
   useFocusEffect(
     useCallback(() => {
-      let cancelled = false;
-      const first = !recentLoaded.current;
-      if (first) {
-        setRecent(null);
-        setRecentFailed(false);
-        setRecentError(null);
-      }
-      Promise.all([listEntries({ limit: 3 }), listEntries({ status: 'unconfirmed', limit: 100 })]).then(
-        ([latest, review]) => {
-          if (cancelled) return;
-          setRecent(latest.entries);
-          setRecentFailed(false);
-          setRecentError(null);
-          setToReview(review.count);
-          recentLoaded.current = true;
-        },
-        (err: unknown) => {
-          if (cancelled || !first) return;
-          setRecent(null);
-          setRecentFailed(true);
-          setRecentError(err instanceof Error ? err.message : 'Unknown error.');
-          setToReview(null);
-        },
-      );
-      return () => {
-        cancelled = true;
-      };
-    }, [reloadKey]),
+      void loadRecent();
+    }, [loadRecent]),
   );
+
+  const refreshLoads = useCallback(async () => {
+    await Promise.all([loadStatus(), loadMonth(), loadRecent()]);
+  }, [loadStatus, loadMonth, loadRecent]);
+  useEffect(() => {
+    registerRefresh(refreshLoads);
+  }, [registerRefresh, refreshLoads]);
 
   useEffect(() => {
     if (active === null || active === undefined) return;
@@ -852,9 +847,10 @@ function HomeBody() {
 }
 
 export default function Home() {
+  const { refreshing, onRefresh, registerRefresh } = usePullRefresh();
   return (
-    <ScreenShell>
-      <HomeBody />
+    <ScreenShell refreshing={refreshing} onRefresh={onRefresh}>
+      <HomeBody registerRefresh={registerRefresh} />
     </ScreenShell>
   );
 }

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { printToFileAsync } from 'expo-print';
 import { isAvailableAsync, shareAsync } from 'expo-sharing';
@@ -7,7 +7,7 @@ import type { CalendarDay, Summary as SummaryData } from '../api';
 import { draftNarrative, getSummary } from '../api';
 import { buildSummaryHtml, formatDuration, symptomLabel } from '../print';
 import { colors, fonts, shadows, sizes } from '../theme';
-import ScreenShell from '../components/ScreenShell';
+import ScreenShell, { usePullRefresh } from '../components/ScreenShell';
 import { ErrorText, FilterChip, GhostButton, PrimaryButton } from '../components/ui';
 
 type WindowDays = 30 | 60 | 90;
@@ -25,7 +25,7 @@ function describe(day: CalendarDay): string {
   return `${label}: ${state}${day.unconfirmed ? ', unconfirmed' : ''}`;
 }
 
-function SummaryBody() {
+function SummaryBody({ registerRefresh }: { registerRefresh: (fn: () => Promise<void>) => void }) {
   const [windowDays, setWindowDays] = useState<WindowDays>(30);
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [failed, setFailed] = useState(false);
@@ -65,6 +65,10 @@ function SummaryBody() {
       load(windowDays);
     }, [load, windowDays]),
   );
+
+  useEffect(() => {
+    registerRefresh(() => load(windowDays));
+  }, [registerRefresh, load, windowDays]);
 
   const draft = async () => {
     if (drafting) return;
@@ -292,9 +296,10 @@ function SummaryBody() {
 }
 
 export default function Summary() {
+  const { refreshing, onRefresh, registerRefresh } = usePullRefresh();
   return (
-    <ScreenShell>
-      <SummaryBody />
+    <ScreenShell refreshing={refreshing} onRefresh={onRefresh}>
+      <SummaryBody registerRefresh={registerRefresh} />
     </ScreenShell>
   );
 }
