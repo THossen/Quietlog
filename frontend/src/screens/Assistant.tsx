@@ -173,6 +173,31 @@ function readDetail(action: AgentAction, onReview: (id: string) => void): ReactN
   return null;
 }
 
+/** Send arrow: springs in when the composer gains text, absent otherwise. */
+function SendButton({ disabled, onPress }: { disabled: boolean; onPress: () => void }) {
+  const reduceMotion = useReducedMotionSetting();
+  const pop = useRef(new Animated.Value(reduceMotion ? 1 : 0)).current;
+  useEffect(() => {
+    if (reduceMotion) return;
+    Animated.spring(pop, { toValue: 1, useNativeDriver: true, speed: 42, bounciness: 5 }).start();
+  }, [pop, reduceMotion]);
+  return (
+    <Animated.View
+      style={{ opacity: pop, transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }] }}
+    >
+      <ScalePressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel="Send message"
+        disabled={disabled}
+        style={[styles.send, disabled ? { opacity: 0.45 } : null]}
+      >
+        <ArrowUp size={22} color={colors.ink} />
+      </ScalePressable>
+    </Animated.View>
+  );
+}
+
 function AssistantBubble({
   message,
   reduceMotion,
@@ -285,6 +310,7 @@ export default function Assistant() {
   } | null>(null);
   const list = useRef<FlatList<ChatMessage>>(null);
   const composerInput = useRef<ComponentRef<typeof TextInput>>(null);
+  const [composerFocused, setComposerFocused] = useState(false);
   const reduceMotion = useReducedMotionSetting();
   const { stream } = useAudioStream({ sampleRate: 16000, channels: 1, encoding: 'int16' });
   const fileRecording = useRef(false);
@@ -1007,7 +1033,7 @@ export default function Assistant() {
               </View>
             </View>
           ) : null}
-          <View style={styles.composer}>
+          <View style={[styles.composer, composerFocused && styles.composerFocused]}>
             <ScalePressable
               onPress={() => (recording ? finishVoice() : beginVoice())}
               accessibilityRole="button"
@@ -1031,6 +1057,8 @@ export default function Assistant() {
                 ref={composerInput}
                 value={input}
                 onChangeText={setInput}
+                onFocus={() => setComposerFocused(true)}
+                onBlur={() => setComposerFocused(false)}
                 accessibilityLabel="Message your diary assistant"
                 placeholder={transcribing ? 'Transcribing…' : 'Write a note or ask…'}
                 placeholderTextColor={colors.dim}
@@ -1041,15 +1069,9 @@ export default function Assistant() {
                 textAlignVertical="top"
               />
             )}
-            <ScalePressable
-              onPress={() => send()}
-              accessibilityRole="button"
-              accessibilityLabel="Send message"
-              disabled={unavailable || !input.trim()}
-              style={[styles.send, (unavailable || !input.trim()) && styles.sendDisabled]}
-            >
-              <ArrowUp size={24} color={colors.ink} />
-            </ScalePressable>
+            {!recording && input.trim() ? (
+              <SendButton onPress={() => send()} disabled={unavailable} />
+            ) : null}
           </View>
           <Text style={styles.disclaimer}>Diary help, never medical advice.</Text>
           </View>
@@ -1188,54 +1210,54 @@ const styles = StyleSheet.create({
   },
   chipsRow: { marginTop: 10 },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  composer: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, marginTop: 10, borderTopWidth: 1, borderTopColor: colors.edge, paddingTop: 12 },
-  mic: {
-    width: sizes.touch,
-    height: sizes.touch,
-    borderRadius: sizes.touch / 2,
+  composer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 4,
+    marginTop: 10,
+    borderRadius: 30,
     borderWidth: 1,
     borderColor: colors.edge,
+    borderTopColor: colors.rise,
     backgroundColor: colors.panelRaised,
+    padding: 6,
+  },
+  composerFocused: { borderColor: colors.gold, borderTopColor: colors.lightAmber },
+  mic: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  micRecording: { borderColor: colors.clay, backgroundColor: colors.clay },
+  micRecording: { backgroundColor: colors.clay },
   recPill: {
     flex: 1,
-    minHeight: sizes.touch,
-    borderRadius: sizes.radius,
-    borderWidth: 1,
-    borderColor: colors.edge,
-    backgroundColor: colors.panelRaised,
+    minHeight: 48,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
   },
   recDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.clay },
   recTime: { color: colors.sand, fontSize: sizes.body, fontFamily: fonts.medium },
   input: {
     flex: 1,
-    minHeight: sizes.touch,
+    minHeight: 48,
     maxHeight: 128,
-    borderRadius: 28,
-    borderWidth: 1,
-    borderColor: colors.edge,
-    backgroundColor: colors.panelRaised,
     color: colors.sand,
     fontSize: sizes.body,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
+    paddingHorizontal: 8,
+    paddingVertical: 12,
   },
   send: {
-    width: sizes.touch,
-    height: sizes.touch,
-    borderRadius: sizes.touch / 2,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: colors.gold,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sendDisabled: { opacity: 0.4 },
   disclaimer: { color: colors.dim, fontSize: 14, textAlign: 'center', marginTop: 8 },
   starterCard: {
     flexDirection: 'row',
