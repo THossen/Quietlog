@@ -10,6 +10,8 @@ export const colors = {
   rise: '#52616A',
   sand: '#F5F0E8',
   dim: '#AEB8BD',
+  /** Placeholder-strength dim: reads as a hint, never as content. */
+  hint: 'rgba(174, 184, 189, 0.5)',
   gold: '#C49A6C',
   lightAmber: '#D5AE7D',
   ink: '#17120D',

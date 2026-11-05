@@ -2,25 +2,22 @@ import { useEffect, useRef, useState, type ComponentRef, type ReactNode } from '
 import {
   Animated,
   FlatList,
-  KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { KeyboardAvoidingView, KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   Activity,
-  ArrowUp,
   ChartLine,
   Check,
-  Mic,
   MessageSquarePlus,
   Sparkles,
-  Square,
   Timer,
   X,
   type LucideIcon,
@@ -37,6 +34,7 @@ import { useReducedMotionSetting } from '../motion';
 import { buildSummaryHtml } from '../print';
 import { colors, fonts, shadows, sizes } from '../theme';
 import { ErrorText, FilterChip, GhostButton, PrimaryButton, ScalePressable } from '../components/ui';
+import AssistantComposer from '../components/AssistantComposer';
 import type { RootStackParamList } from '../nav';
 
 const EMPTY_HINT = 'Log how you feel, or ask about your diary.';
@@ -173,31 +171,6 @@ function readDetail(action: AgentAction, onReview: (id: string) => void): ReactN
   return null;
 }
 
-/** Send arrow: springs in when the composer gains text, absent otherwise. */
-function SendButton({ disabled, onPress }: { disabled: boolean; onPress: () => void }) {
-  const reduceMotion = useReducedMotionSetting();
-  const pop = useRef(new Animated.Value(reduceMotion ? 1 : 0)).current;
-  useEffect(() => {
-    if (reduceMotion) return;
-    Animated.spring(pop, { toValue: 1, useNativeDriver: true, speed: 42, bounciness: 5 }).start();
-  }, [pop, reduceMotion]);
-  return (
-    <Animated.View
-      style={{ opacity: pop, transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }] }}
-    >
-      <ScalePressable
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel="Send message"
-        disabled={disabled}
-        style={[styles.send, disabled ? { opacity: 0.45 } : null]}
-      >
-        <ArrowUp size={22} color={colors.ink} />
-      </ScalePressable>
-    </Animated.View>
-  );
-}
-
 function AssistantBubble({
   message,
   reduceMotion,
@@ -256,6 +229,15 @@ function AssistantBubble({
 }
 
 export default function Assistant() {
+  // Keep keyboard tracking inside the full-screen modal and its lifecycle.
+  return (
+    <KeyboardProvider>
+      <AssistantScreen />
+    </KeyboardProvider>
+  );
+}
+
+function AssistantScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
   const { messages, appendMessage, updateMessage, clearMessages, setJustLoggedId, pending, setPending, followAnswers, setFollowAnswers, input, setInput, busy, setBusy, sending, turnState, setTurnState } = useChat();
@@ -310,7 +292,6 @@ export default function Assistant() {
   } | null>(null);
   const list = useRef<FlatList<ChatMessage>>(null);
   const composerInput = useRef<ComponentRef<typeof TextInput>>(null);
-  const [composerFocused, setComposerFocused] = useState(false);
   const reduceMotion = useReducedMotionSetting();
   const { stream } = useAudioStream({ sampleRate: 16000, channels: 1, encoding: 'int16' });
   const fileRecording = useRef(false);
@@ -838,7 +819,8 @@ export default function Assistant() {
 
   return (
     <SafeAreaView style={[styles.screen, { paddingTop: insets.top }]} edges={['bottom', 'left', 'right']}>
-      <KeyboardAvoidingView style={styles.sheet} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {/* Follow native keyboard frames, including interactive dismissal, on the UI thread. */}
+      <KeyboardAvoidingView style={styles.sheet} behavior="padding" automaticOffset>
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <View style={styles.titleBadge}>
@@ -1017,7 +999,6 @@ export default function Assistant() {
           />
           <View style={styles.frameBottom}>
           {busy ? <Text accessibilityLiveRegion="polite" style={styles.thinking}>{quickStatus ?? pdfStatus ?? PROGRESS_STAGES[progressIdx]}</Text> : null}
-          {transcribing ? <Text style={styles.thinking}>Transcribing…</Text> : null}
           {error ? <ErrorText>{error}</ErrorText> : null}
           {failedVoice && !recording ? (
             <View style={styles.voiceFailBox}>
@@ -1033,46 +1014,19 @@ export default function Assistant() {
               </View>
             </View>
           ) : null}
-          <View style={[styles.composer, composerFocused && styles.composerFocused]}>
-            <ScalePressable
-              onPress={() => (recording ? finishVoice() : beginVoice())}
-              accessibilityRole="button"
-              accessibilityLabel={recording ? 'Stop recording' : 'Record a voice message'}
-              disabled={busy || transcribing || startingVoice}
-              style={[styles.mic, recording && styles.micRecording]}
-            >
-              {recording ? (
-                <Square size={20} color={colors.sand} />
-              ) : (
-                <Mic size={22} color={colors.sand} />
-              )}
-            </ScalePressable>
-            {recording ? (
-              <View style={styles.recPill}>
-                <View style={styles.recDot} />
-                <Text style={styles.recTime}>{formatClock(recSeconds)}</Text>
-              </View>
-            ) : (
-              <TextInput
-                ref={composerInput}
-                value={input}
-                onChangeText={setInput}
-                onFocus={() => setComposerFocused(true)}
-                onBlur={() => setComposerFocused(false)}
-                accessibilityLabel="Message your diary assistant"
-                placeholder={transcribing ? 'Transcribing…' : 'Write a note or ask…'}
-                placeholderTextColor={colors.dim}
-                style={styles.input}
-                maxLength={1000}
-                multiline
-                editable={!transcribing}
-                textAlignVertical="top"
-              />
-            )}
-            {!recording && input.trim() ? (
-              <SendButton onPress={() => send()} disabled={unavailable} />
-            ) : null}
-          </View>
+          <AssistantComposer
+            ref={composerInput}
+            value={input}
+            onChangeText={setInput}
+            onSend={() => { void send(); }}
+            onStartRecording={() => { void beginVoice(); }}
+            onStopRecording={() => { void finishVoice(); }}
+            busy={busy}
+            startingVoice={startingVoice}
+            recording={recording}
+            recordingSeconds={recSeconds}
+            transcribing={transcribing}
+          />
           <Text style={styles.disclaimer}>Diary help, never medical advice.</Text>
           </View>
         </View>
@@ -1210,55 +1164,7 @@ const styles = StyleSheet.create({
   },
   chipsRow: { marginTop: 10 },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  composer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 4,
-    marginTop: 10,
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: colors.edge,
-    borderTopColor: colors.rise,
-    backgroundColor: colors.panelRaised,
-    padding: 6,
-  },
-  composerFocused: { borderColor: colors.gold, borderTopColor: colors.lightAmber },
-  mic: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  micRecording: { backgroundColor: colors.clay },
-  recPill: {
-    flex: 1,
-    minHeight: 48,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 10,
-  },
-  recDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.clay },
-  recTime: { color: colors.sand, fontSize: sizes.body, fontFamily: fonts.medium },
-  input: {
-    flex: 1,
-    minHeight: 48,
-    maxHeight: 128,
-    color: colors.sand,
-    fontSize: sizes.body,
-    paddingHorizontal: 8,
-    paddingVertical: 12,
-  },
-  send: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.gold,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  disclaimer: { color: colors.dim, fontSize: 14, textAlign: 'center', marginTop: 8 },
+  disclaimer: { color: colors.dim, fontSize: 12, lineHeight: 18, textAlign: 'center', marginTop: 8 },
   starterCard: {
     flexDirection: 'row',
     alignItems: 'center',
